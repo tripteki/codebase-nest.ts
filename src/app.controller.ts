@@ -12,8 +12,8 @@ export class AppController
     }
 
     @Get ()
-    getHello (): string
+    index (): string
     {
-        return this.appService.getHello ();
+        return this.appService.variable ();
     }
 };

@@ -1,0 +1,5 @@
+APP_HOST=localhost
+APP_PORT=3000
+
+NODE_ENV=production
+TZ=UTC

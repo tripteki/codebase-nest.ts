@@ -1,12 +1,18 @@
 "use strict";
 
 import { Injectable, } from "@nestjs/common";
+import { ConfigService, } from "@nestjs/config";
 
 @Injectable ()
 export class AppService
 {
-    getHello (): string
+    constructor (private readonly configService: ConfigService)
     {
-        return "Hello World!";
+        //
+    }
+
+    variable (): string
+    {
+        return this.configService.get<string> ("app.name") + ":" + this.configService.get<string> ("app.version");
     }
 };

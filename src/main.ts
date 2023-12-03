@@ -2,6 +2,7 @@
 
 import { NestFactory, } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication, } from "@nestjs/platform-fastify";
+import { ConfigService, } from "@nestjs/config";
 import { AppModule, } from "./app.module";
 
 (async () =>
@@ -12,6 +13,8 @@ import { AppModule, } from "./app.module";
         new FastifyAdapter (),
     );
 
+    const configService = initialization.get (ConfigService);
+
     await initialization.
-    listen (3000);
+    listen (configService.get<number> ("app.port"), configService.get<string> ("app.host"));
 }) ();
