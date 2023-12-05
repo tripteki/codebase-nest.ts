@@ -48,6 +48,7 @@ web-build/
 hot/
 storage/*.key
 coverage/
+public/documentation/
 doc/
 docs/
 rdoc/
