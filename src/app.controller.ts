@@ -6,7 +6,10 @@ import { FastifyRequest as Request, FastifyReply as Response, } from "fastify";
 import { AppService, } from "./app.service";
 
 @ApiTags ("Admin")
-@Controller ()
+@Controller ({
+
+    version: "1",
+})
 /**
  * @class
  */

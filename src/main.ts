@@ -2,6 +2,7 @@
 
 import { NestFactory, } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication, } from "@nestjs/platform-fastify";
+import { VersioningType, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
 import { SwaggerModule, DocumentBuilder as SwaggerBuilder, } from "@nestjs/swagger";
 import { AppModule, } from "./app.module";
@@ -18,6 +19,7 @@ import { AppModule, } from "./app.module";
     );
 
     initialization.setGlobalPrefix ("api");
+    initialization.enableVersioning ({ type: VersioningType.URI, });
 
     const configService = initialization.get (ConfigService),
     swaggerService = SwaggerModule.createDocument (initialization, ((new SwaggerBuilder ()).
