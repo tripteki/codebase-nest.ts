@@ -3,6 +3,10 @@ APP_PORT=3000
 
 NODE_ENV=production
 TZ=UTC
+APP_LOCALE=en_US
 
 REDIS_URL=redis://localhost:6379/0
 REDIS_PASSWORD=password
+
+MONGODB_URL=mongodb://user:password@localhost:27017/base
+MYSQL_URL=mysql://user:password@localhost:3306/base

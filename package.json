@@ -18,7 +18,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migration:migrate:mongodb": "npx prisma db push --schema database/migrations/mongodb.schema.prisma",
+    "migration:generate:mysql": "npx prisma migrate dev --schema database/migrations/mysql.schema.prisma --create-only --name",
+    "migration:status:mysql": "npx prisma migrate status --schema database/migrations/mysql.schema.prisma",
+    "migration:migrate-development:mysql": "npx prisma db push --schema database/migrations/mysql.schema.prisma && npx prisma migrate dev --schema database/migrations/mysql.schema.prisma",
+    "migration:migrate-production:mysql": "npx prisma migrate deploy --schema database/migrations/mysql.schema.prisma --preview-feature"
   },
   "dependencies": {
     "@fastify/static": "^6.12.0",
@@ -29,13 +34,17 @@
     "@nestjs/platform-fastify": "^10.2.10",
     "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^7.1.16",
+    "@prisma/client": "^5.7.0",
+    "bson": "^6.2.0",
     "cache-manager": "^5.3.1",
     "cache-manager-redis-yet": "^4.1.2",
+    "prisma-event-dispatcher": "^1.0.14",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.23",
+    "@faker-js/faker": "^8.3.1",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
@@ -52,6 +61,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "jest": "^29.5.0",
     "prettier": "^3.1.0",
+    "prisma": "^5.7.0",
     "source-map-support": "^0.5.21",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
@@ -59,6 +69,9 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.2"
+  },
+  "prisma": {
+    "seed": "ts-node database/seeders/seeder.ts"
   },
   "jest": {
     "moduleFileExtensions": [

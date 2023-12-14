@@ -38,4 +38,9 @@ export default registerAs ("app", () => (
      * Timezone of application.
      */
     timezone: String (process.env.TZ || "UTC"),
+
+    /**
+     * Localization of application.
+     */
+    locale: String (process.env.APP_LOCALE || "en_US"),
 }));
