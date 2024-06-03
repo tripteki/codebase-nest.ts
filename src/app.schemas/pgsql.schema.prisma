@@ -1,13 +1,13 @@
 generator client {
 
-    provider = "prisma-client-js"
-    output      = "../../node_modules/@prisma/mysql/client"
+    provider    = "prisma-client-js"
+    output      = "../../node_modules/@prisma/pgsql/client"
 }
 
 datasource db {
 
-    provider = "mysql"
-    url      = env ("MYSQL_URL")
+    provider    = "postgresql"
+    url         = env ("PGSQL_URI")
 }
 
 model User {

@@ -1,14 +1,14 @@
 "use strict";
 
 import { Injectable, OnModuleInit, OnModuleDestroy, } from "@nestjs/common";
-import { PrismaClient, } from "@prisma/mysql/client";
+import { PrismaClient, } from "@prisma/pgsql/client";
 
 @Injectable ()
 /**
  * @class
  * @implements {OnModuleInit}
  */
-export class PrismaMysqlDriverConfigService extends PrismaClient implements OnModuleInit, OnModuleDestroy
+export class PrismaPgsqlDriverConfigService extends PrismaClient implements OnModuleInit, OnModuleDestroy
 {
     /**
      * @returns {Promise<void>}

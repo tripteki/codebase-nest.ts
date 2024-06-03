@@ -4,8 +4,8 @@ import { Module, } from "@nestjs/common";
 import { ConfigModule, } from "@nestjs/config";
 import { ServeStaticModule, } from "@nestjs/serve-static";
 import { CacheModule, } from "@nestjs/cache-manager";
-import { DatabaseModule, } from "./databases/database.module";
-import { RedisDriverConfigService, } from "src/caches/redis.driver.config.service";
+import { DatabaseModule, } from "./app.drivers/databases/database.module";
+import { RedisDriverConfigService, } from "./app.drivers/caches/redis.driver.config.service";
 import AppConfig from "../config/app";
 import SwaggerConfig from "../config/swagger";
 import { join, } from "path";
@@ -28,7 +28,7 @@ import { join, } from "path";
         ServeStaticModule.forRoot ({
 
             rootPath: join (__dirname, "../../", "public/"),
-            serveRoot: "/web",
+            serveRoot: "/",
             exclude: [ "/api/*", ],
         }),
 

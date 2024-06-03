@@ -21,8 +21,7 @@ export class RedisDriverConfigService implements CacheOptionsFactory
 
             store: await redisStore ({
 
-                url: String (process.env.REDIS_URL),
-                password: String (process.env.REDIS_PASSWORD || "password"),
+                url: String (process.env.REDIS_URI),
             }),
 
             ...cacheConfig,

@@ -5,27 +5,36 @@
   "author": "Anonymous <anonymous@email.com>",
   "private": true,
   "license": "UNLICENSED",
+
   "scripts": {
-    "docs": "npx @compodoc/compodoc -p tsconfig.json -d public/documentation --hideDarkModeToggle --hideGenerator --disableDependencies --disableSourceCode --disableTemplateTab --disableStyleTab",
-    "build": "nest build",
+
+    "documentation": "npx @compodoc/compodoc -p tsconfig.json -d public/documentation --hideDarkModeToggle --hideGenerator --disableDependencies --disableSourceCode --disableTemplateTab --disableStyleTab",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "build": "nest build",
     "start": "nest start",
-    "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:development": "nest start --watch",
+    "start:production": "npx bun ./dist/main",
     "lint": "npm run format && eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "npm run test:e2e",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
+    "test:coverage": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:migrate:mongodb": "npx prisma db push --schema database/migrations/mongodb.schema.prisma",
-    "migration:generate:mysql": "npx prisma migrate dev --schema database/migrations/mysql.schema.prisma --create-only --name",
-    "migration:status:mysql": "npx prisma migrate status --schema database/migrations/mysql.schema.prisma",
-    "migration:migrate-development:mysql": "npx prisma db push --schema database/migrations/mysql.schema.prisma && npx prisma migrate dev --schema database/migrations/mysql.schema.prisma",
-    "migration:migrate-production:mysql": "npx prisma migrate deploy --schema database/migrations/mysql.schema.prisma --preview-feature"
+    "test:e2e": "jest --testRegex='\\.e2e-spec\\.ts$' --coverage",
+    "migrate:mongodb": "npx prisma db push --schema src/app.schemas/mongodb.schema.prisma && npx prisma db pull --schema src/app.schemas/mongodb.schema.prisma --force",
+    "migrate:pgsql": "npx prisma migrate deploy --schema src/app.schemas/pgsql.schema.prisma && npx prisma db push --schema src/app.schemas/pgsql.schema.prisma && npx prisma db pull --schema src/app.schemas/pgsql.schema.prisma",
+    "migrate:pgsql:init": "npx prisma migrate dev --schema src/app.schemas/pgsql.schema.prisma --create-only --name $npm_config_name",
+    "migrate:pgsql:seed": "npx prisma db seed"
   },
+
+  "prisma": {
+
+    "seed": "ts-node src/app.seeder.ts"
+  },
+
   "dependencies": {
+
+    "bun": "^1.1.29",
     "@fastify/static": "^6.12.0",
     "@nestjs/cache-manager": "^2.1.1",
     "@nestjs/common": "^10.0.0",
@@ -40,9 +49,15 @@
     "cache-manager-redis-yet": "^4.1.2",
     "prisma-event-dispatcher": "^1.0.14",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1"
   },
+
   "devDependencies": {
+
+    "@swc/core": "^1.7.26",
+    "@swc/cli": "^0.3.14",
     "@compodoc/compodoc": "^1.1.23",
     "@faker-js/faker": "^8.3.1",
     "@nestjs/cli": "^10.0.0",
@@ -70,24 +85,21 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.2"
   },
-  "prisma": {
-    "seed": "ts-node database/seeders/seeder.ts"
-  },
+
   "jest": {
+
     "moduleFileExtensions": [
-      "js",
+
       "json",
+      "js",
       "ts"
     ],
+
     "rootDir": "src",
+    "transform": { "^.+\\.(t|j)s$": "ts-jest" },
+    "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "collectCoverageFrom": [ "**/*.(t|j)s" ],
+    "coverageDirectory": "../coverage"
   }
 }
