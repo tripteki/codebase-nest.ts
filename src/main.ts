@@ -2,34 +2,41 @@
 
 import { NestFactory, } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication, } from "@nestjs/platform-fastify";
-import { VersioningType, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
-import { SwaggerModule, DocumentBuilder as SwaggerBuilder, } from "@nestjs/swagger";
-import { AppModule, } from "./app.module";
+import { AppInstanceProvider, } from "src/app/provider.instance";
+import { AppSecurityCorsProvider, } from "src/app/provider.security.cors";
+import { AppSecurityCsrfProvider, } from "src/app/provider.security.csrf";
+import { AppSecurityHelmetProvider, } from "src/app/provider.security.helmet";
+import { AppLoggerProvider, } from "src/app/provider.logger";
+import { AppSwaggerProvider, } from "src/app/provider.swagger";
+import { AppModule, } from "src/app/module";
 
 /**
- * @returns {void}
+ * @returns {Promise<void>}
  */
 (async () =>
 {
-    const initialization = await NestFactory.create<NestFastifyApplication> (
+    const
 
+    app = await NestFactory.create<NestFastifyApplication> (
         AppModule,
-        new FastifyAdapter (),
+        new FastifyAdapter ()
+    ),
+
+    configService = app.get (
+        ConfigService
     );
 
-    initialization.setGlobalPrefix ("api");
-    initialization.enableVersioning ({ type: VersioningType.URI, });
+    (new AppLoggerProvider (app));
+    // (new AppSecurityCsrfProvider (app)); //
+    // (new AppSecurityHelmetProvider (app)); //
+    (new AppSecurityCorsProvider (app));
+    (new AppInstanceProvider (app));
+    (new AppSwaggerProvider (app));
 
-    const configService = initialization.get (ConfigService),
-    swaggerService = SwaggerModule.createDocument (initialization, ((new SwaggerBuilder ()).
-        setTitle (configService.get<string> ("swagger.title")).
-        setDescription (configService.get<string> ("swagger.description")).
-        setVersion (configService.get<string> ("swagger.version"))
-    .build ()));
+    await app.listen (
+        configService.get<number> ("app.port"),
+        configService.get<string> ("app.host")
+    );
 
-    SwaggerModule.setup ("api/" + configService.get<string> ("swagger.path"), initialization, swaggerService);
-
-    await initialization.
-    listen (configService.get<number> ("app.port"), configService.get<string> ("app.host"));
 }) ();

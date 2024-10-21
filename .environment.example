@@ -1,10 +1,7 @@
 APP_HOST=localhost
 APP_PORT=3000
 
-NODE_ENV=production
 TZ=UTC
+NODE_ENV=production
+LOG_LEVEL=debug
 APP_LOCALE=en_US
-
-REDIS_URI=redis://:password@localhost:6379/0
-MONGODB_URI=mongodb://user:password@localhost:27017/base
-PGSQL_URI=postgresql://user:password@localhost:5432/base

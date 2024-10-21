@@ -59,7 +59,7 @@ rdocs/
 *-env.d.ts
 *.key
 *.debug*
-*.log*
+*.log
 *.pid
 *.pid.lock
 *.manifest
