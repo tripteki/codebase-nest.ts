@@ -1,6 +1,6 @@
 "use strict";
 
-import { NestFastifyApplication, } from "@nestjs/platform-fastify";
+import { INestApplication as NestExpressApplication, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
 
 /**
@@ -10,14 +10,14 @@ import { ConfigService, } from "@nestjs/config";
 export abstract class AppProvider
 {
     /**
-     * @type {NestFastifyApplication}
+     * @type {NestExpressApplication}
      */
-    protected appService: NestFastifyApplication;
+    protected appService: NestExpressApplication;
 
     /**
-     * @type {NestFastifyApplication}
+     * @type {NestExpressApplication}
      */
-    protected configService: NestFastifyApplication;
+    protected configService: NestExpressApplication;
 
     /**
      * @returns {Promise<void>}
@@ -30,10 +30,10 @@ export abstract class AppProvider
     public abstract boot (): Promise<void>;
 
     /**
-     * @param {NestFastifyApplication} appService
+     * @param {NestExpressApplication} appService
      * @returns {void}
      */
-    constructor (appService: NestFastifyApplication)
+    constructor (appService: NestExpressApplication)
     {
         this.appService = appService;
         this.configService = appService.get (ConfigService);

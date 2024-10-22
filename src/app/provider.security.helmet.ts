@@ -1,7 +1,7 @@
 "use strict";
 
 import { AppProvider, } from "src/app/provider";
-import helmet from "@fastify/helmet";
+import helmet from "helmet";
 
 /**
  * @class
@@ -14,7 +14,7 @@ export class AppSecurityHelmetProvider extends AppProvider
      */
     public async register (): Promise<void>
     {
-        await this.appService.register (helmet);
+        //
     }
 
     /**
@@ -22,6 +22,6 @@ export class AppSecurityHelmetProvider extends AppProvider
      */
     public async boot (): Promise<void>
     {
-        //
+        this.appService.use (helmet ());
     }
 };

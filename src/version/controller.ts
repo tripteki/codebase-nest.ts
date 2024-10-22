@@ -2,7 +2,7 @@
 
 import { Controller, Get, Res, HttpStatus, } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, } from "@nestjs/swagger";
-import { FastifyRequest as Request, FastifyReply as Response, } from "fastify";
+import { Request, Response, } from "express";
 import { VersionService, } from "src/version/service";
 
 @ApiTags ("Version")
@@ -33,7 +33,7 @@ export class VersionController
         description: "Success.",
     })
     /**
-     * @param {FastifyReply} response
+     * @param {Response} response
      * @returns {void}
      */
     index (@Res () response: Response): void

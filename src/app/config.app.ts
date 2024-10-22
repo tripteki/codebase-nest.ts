@@ -35,10 +35,7 @@ export default registerAs ("app", () => (
         /**
          * Configures the `Access-Control-Allow-Origins` CORS header. [See for more detail.](https://github.com/expressjs/cors#configuration-options).
          */
-        origin: [
-
-            String (process.env.FRONTEND_URL || "http://localhost:3000"),
-        ],
+        origin: String (process.env.FRONTEND_URL || "http://localhost:3000"),
 
         /**
          * Configures the Access-Control-Allow-Methods CORS header.

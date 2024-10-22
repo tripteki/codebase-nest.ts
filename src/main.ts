@@ -1,7 +1,7 @@
 "use strict";
 
 import { NestFactory, } from "@nestjs/core";
-import { FastifyAdapter, NestFastifyApplication, } from "@nestjs/platform-fastify";
+import { NestExpressApplication, } from "@nestjs/platform-express";
 import { ConfigService, } from "@nestjs/config";
 import { AppInstanceProvider, } from "src/app/provider.instance";
 import { AppSecurityCorsProvider, } from "src/app/provider.security.cors";
@@ -18,9 +18,8 @@ import { AppModule, } from "src/app/module";
 {
     const
 
-    app = await NestFactory.create<NestFastifyApplication> (
-        AppModule,
-        new FastifyAdapter ()
+    app = await NestFactory.create<NestExpressApplication> (
+        AppModule
     ),
 
     configService = app.get (
@@ -28,8 +27,8 @@ import { AppModule, } from "src/app/module";
     );
 
     (new AppLoggerProvider (app));
-    // (new AppSecurityCsrfProvider (app)); //
-    // (new AppSecurityHelmetProvider (app)); //
+    (new AppSecurityCsrfProvider (app));
+    (new AppSecurityHelmetProvider (app));
     (new AppSecurityCorsProvider (app));
     (new AppInstanceProvider (app));
     (new AppSwaggerProvider (app));

@@ -1,7 +1,7 @@
 "use strict";
 
 import { AppProvider, } from "src/app/provider";
-import csrf from "@fastify/csrf-protection";
+import { doubleCsrf, } from "csrf-csrf";
 
 /**
  * @class
@@ -14,7 +14,7 @@ export class AppSecurityCsrfProvider extends AppProvider
      */
     public async register (): Promise<void>
     {
-        await this.appService.register (csrf);
+        //
     }
 
     /**
@@ -22,6 +22,18 @@ export class AppSecurityCsrfProvider extends AppProvider
      */
     public async boot (): Promise<void>
     {
-        //
+        const {
+
+            generateToken,
+            validateRequest,
+            doubleCsrfProtection,
+            invalidCsrfTokenError,
+
+        } = doubleCsrf (
+        {
+            getSecret: null,
+        });
+
+        this.appService.use (doubleCsrfProtection);
     }
 };
