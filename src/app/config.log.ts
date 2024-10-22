@@ -13,9 +13,9 @@ import * as winston from "winston";
 export class LogConfigService implements WinstonModuleOptionsFactory
 {
     /**
-     * @returns {Promise<WinstonModuleOptions> | WinstonModuleOptions}
+     * @returns {Promise<WinstonModuleOptions>|WinstonModuleOptions}
      */
-    public createWinstonModuleOptions (): Promise<WinstonModuleOptions> | WinstonModuleOptions
+    public createWinstonModuleOptions (): Promise<WinstonModuleOptions>|WinstonModuleOptions
     {
         return {
 

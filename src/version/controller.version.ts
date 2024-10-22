@@ -3,7 +3,7 @@
 import { Controller, Get, Res, HttpStatus, } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, } from "@nestjs/swagger";
 import { Request, Response, } from "express";
-import { VersionService, } from "src/version/service";
+import { VersionService, } from "src/version/service.version";
 
 @ApiTags ("Version")
 @Controller ({
@@ -36,13 +36,13 @@ export class VersionController
      * @param {Response} response
      * @returns {void}
      */
-    index (@Res () response: Response): void
+    async index (@Res () response: Response): Promise<void>
     {
         response.
         status (HttpStatus.OK).
         send (
         {
-            data: this.versionService.variable (),
+            data: (await this.versionService.variable ()),
         });
     }
 };

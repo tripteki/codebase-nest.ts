@@ -20,7 +20,13 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-        "test:e2e": "jest --testRegex='\\.e2e-spec\\.ts$' --coverage"
+        "test:e2e": "jest --testRegex='\\.e2e-spec\\.ts$' --coverage",
+        "migrator": "npx typeorm-ts-node-commonjs --dataSource ./src/app/driver.database.ts",
+        "migration:create": "npx typeorm-ts-node-commonjs migration:create",
+        "migration:list": "npm run migrator migration:show",
+        "migration:up": "npm run migrator migration:run",
+        "migration:down": "npm run migrator migration:revert",
+        "migration:reset": "npm run migrator schema:drop"
     },
 
     "dependencies": {
@@ -38,11 +44,10 @@
         "@nestjs/serve-static": "^4.0.0",
         "@nestjs/swagger": "^7.1.16",
         "@nestjs/typeorm": "^10.0.2",
-        "@types/mongodb": "^4.0.7",
-        "@types/pg": "^8.11.10",
         "typeorm": "^0.3.20",
         "mongodb": "^5.9.2",
         "pg": "^8.13.0",
+        "mysql2": "^3.11.3",
         "cache-manager": "^5.3.1",
         "cache-manager-redis-yet": "^4.1.2",
         "nest-winston": "^1.9.7",
