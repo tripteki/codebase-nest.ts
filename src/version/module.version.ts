@@ -7,6 +7,7 @@ import { Logger as LogService, } from "@nestjs/common";
 import { VersionEntity, } from "src/version/entity.version";
 import { VersionService, } from "src/version/service.version";
 import { VersionController, } from "src/version/controller.version";
+import { SeederCommandVersion, } from "src/version/seeder.version";
 
 @Module ({
 
@@ -24,6 +25,8 @@ import { VersionController, } from "src/version/controller.version";
 
         LogService,
         VersionService,
+
+        SeederCommandVersion,
     ],
 
     controllers: [

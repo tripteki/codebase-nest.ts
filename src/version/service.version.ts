@@ -41,7 +41,7 @@ export class VersionService
         await this.cacheRepository.set ("version", version);
         await this.logService.log (await this.cacheRepository.get ("version"));
 
-        this.versionRepository.save (await this.versionRepository.create ({ tag: version, }));
+        await this.versionRepository.save (await this.versionRepository.create ({ tag: version, }));
 
         return version;
     }

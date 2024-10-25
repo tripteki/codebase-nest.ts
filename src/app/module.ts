@@ -10,7 +10,6 @@ import { VersionModule, } from "src/version/module.version";
 import { ConfigService, } from "@nestjs/config";
 import { RedisDriverConfigService, } from "src/app/driver.cache";
 import { MongoDriverConfigService, PostgreDriverConfigService, MariaDriverConfigService, } from "src/app/driver.database";
-import { DataSource, } from "typeorm";
 import AppConfig from "src/app/config.app";
 import SwaggerConfig from "src/app/config.swagger";
 import CacheConfig from "src/app/config.cache";
@@ -48,11 +47,7 @@ import DatabaseConfig from "src/app/config.database";
             isGlobal: true,
             imports: [ ConfigModule, ],
             inject: [ ConfigService, ],
-            useFactory: async (configService: ConfigService) => ({
-
-                ... (configService.get<Object> ("cache")),
-                ... (await (new RedisDriverConfigService ().createCacheOptions ())),
-            }),
+            useClass: RedisDriverConfigService,
         }),
 
         DatabaseModule.forRootAsync ({
@@ -60,13 +55,7 @@ import DatabaseConfig from "src/app/config.database";
             name: "mongoConnection",
             imports: [ ConfigModule, ],
             inject: [ ConfigService, ],
-
-            useFactory: async (configService: ConfigService) => ({
-
-                ... (await (new MongoDriverConfigService (configService).createTypeOrmOptions ())),
-            }),
-
-            dataSourceFactory: async (options) => await new DataSource (options).initialize (),
+            useClass: MongoDriverConfigService,
         }),
 
         DatabaseModule.forRootAsync ({
@@ -74,13 +63,7 @@ import DatabaseConfig from "src/app/config.database";
             name: "postgreConnection",
             imports: [ ConfigModule, ],
             inject: [ ConfigService, ],
-
-            useFactory: async (configService: ConfigService) => ({
-
-                ... (await (new PostgreDriverConfigService (configService).createTypeOrmOptions ())),
-            }),
-
-            dataSourceFactory: async (options) => await new DataSource (options).initialize (),
+            useClass: PostgreDriverConfigService,
         }),
 
         DatabaseModule.forRootAsync ({
@@ -88,13 +71,7 @@ import DatabaseConfig from "src/app/config.database";
             name: "mariaConnection",
             imports: [ ConfigModule, ],
             inject: [ ConfigService, ],
-
-            useFactory: async (configService: ConfigService) => ({
-
-                ... (await (new MariaDriverConfigService (configService).createTypeOrmOptions ())),
-            }),
-
-            dataSourceFactory: async (options) => await new DataSource (options).initialize (),
+            useClass: MariaDriverConfigService,
         }),
 
         ... [

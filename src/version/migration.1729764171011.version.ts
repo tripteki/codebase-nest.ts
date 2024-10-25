@@ -28,7 +28,6 @@ export class Migration1729764171011Version implements MigrationInterface
                         generationStrategy: "uuid",
                         default: "gen_random_uuid ()",
                     },
-
                     {
                         name: "tag",
                         type: "varchar",

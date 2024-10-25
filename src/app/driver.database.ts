@@ -5,6 +5,7 @@ import { ConfigService, } from "@nestjs/config";
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory, } from "@nestjs/typeorm";
 import { DataSource, } from "typeorm";
 import { join, } from "path";
+import configHelper from "./helper.config";
 
 /**
  * @abstract
@@ -15,7 +16,7 @@ abstract class DatabaseDriver
     /**
      * @returns {Object}
      */
-    protected createCommonOptions ()
+    protected createCommonOptions (): Object
     {
         return {
 
@@ -62,6 +63,7 @@ export class SqliteDriverConfigService extends DatabaseDriver implements TypeOrm
     {
         return {
 
+            name: "sqliteConnection",
             type: "sqlite",
             ... this.createCommonOptions (),
             ... this.configService.get<Object> ("database.sqlite"),
@@ -96,6 +98,7 @@ export class MongoDriverConfigService extends DatabaseDriver implements TypeOrmO
     {
         return {
 
+            name: "mongoConnection",
             type: "mongodb",
             ... this.createCommonOptions (),
             ... this.configService.get<Object> ("database.mongo"),
@@ -130,6 +133,7 @@ export class PostgreDriverConfigService extends DatabaseDriver implements TypeOr
     {
         return {
 
+            name: "postgreConnection",
             type: "postgres",
             ... this.createCommonOptions (),
             ... this.configService.get<Object> ("database.postgre"),
@@ -164,6 +168,7 @@ export class MariaDriverConfigService extends DatabaseDriver implements TypeOrmO
     {
         return {
 
+            name: "mariaConnection",
             type: "mariadb",
             ... this.createCommonOptions (),
             ... this.configService.get<Object> ("database.maria"),
@@ -177,13 +182,14 @@ export class MariaDriverConfigService extends DatabaseDriver implements TypeOrmO
  */
 export const AppDataSource = (() =>
 {
-    require ("dotenv").config ({ path: join (__dirname, "../../", ".env"), });
+    const
 
-    const migrator: string = process.env.MIGRATOR || "postgre";
+    databaseConfig = configHelper ("database"),
+    migrator: string = process.env.MIGRATOR || "postgre";
 
     return new DataSource ({
 
         ... new exports[((migrator.charAt (0).toUpperCase () + migrator.slice (1)) + "DriverConfigService")] (new ConfigService ()).createTypeOrmOptions (),
-        ... require ("./config.database").default ()[migrator],
+        ... databaseConfig[migrator],
     });
 }) ();
