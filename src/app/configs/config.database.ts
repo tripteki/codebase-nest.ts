@@ -10,7 +10,7 @@ export default registerAs ("database", () => (
      */
     sqlite: {
 
-        database: join (__dirname, "../../", "storage/datas/"),
+        database: join (__dirname, "../../../", "storage/datas/"),
     },
 
     /**

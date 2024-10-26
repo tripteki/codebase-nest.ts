@@ -3,7 +3,7 @@
 import { Controller, Get, Res, HttpStatus, } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags, } from "@nestjs/swagger";
 import { Request, Response, } from "express";
-import { VersionService, } from "src/version/service.version";
+import { VersionService, } from "src/version/services/service.version";
 
 @ApiTags ("Version")
 @Controller ({

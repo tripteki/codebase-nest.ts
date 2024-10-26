@@ -5,7 +5,7 @@ import { ConfigService, } from "@nestjs/config";
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory, } from "@nestjs/typeorm";
 import { DataSource, } from "typeorm";
 import { join, } from "path";
-import configHelper from "./helper.config";
+import configHelper from "../helpers/helper.config";
 
 /**
  * @abstract
@@ -25,12 +25,12 @@ abstract class DatabaseDriver
 
             migrations: [
 
-                join (__dirname, "../", "**/migration.*{.ts,.js}"),
+                join (__dirname, "../../", "**/migration.*{.ts,.js}"),
             ],
 
             entities: [
 
-                join (__dirname, "../", "**/entity.*{.ts,.js}"),
+                join (__dirname, "../../", "**/entity.*{.ts,.js}"),
             ],
         };
     }

@@ -1,7 +1,7 @@
 "use strict";
 
-import configHelper from "src/app/helper.config";
-import fakerHelper from "src/app/helper.faker";
+import configHelper from "src/app/helpers/helper.config";
+import fakerHelper from "src/app/helpers/helper.faker";
 
 /**
  * @function

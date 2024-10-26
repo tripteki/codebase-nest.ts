@@ -11,9 +11,9 @@ import { config, } from "dotenv";
  */
 export const configHelper = (compose: string): any =>
 {
-    config ({ path: join (__dirname, "../../", ".env"), });
+    config ({ path: join (__dirname, "../../../", ".env"), });
 
-    return require (join (__dirname, `./config.${compose}`)).default ();
+    return require (join (__dirname, `../configs/config.${compose}`)).default ();
 };
 
 export default configHelper;

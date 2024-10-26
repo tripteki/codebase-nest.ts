@@ -6,7 +6,7 @@ import { Cache as CacheService, } from "cache-manager";
 import { InjectRepository, } from "@nestjs/typeorm";
 import { Repository, } from "typeorm";
 import { CACHE_MANAGER as CacheRepository, } from "@nestjs/cache-manager";
-import { VersionEntity, } from "src/version/entity.version";
+import { VersionEntity, } from "src/version/entities/entity.version";
 
 @Injectable ()
 /**

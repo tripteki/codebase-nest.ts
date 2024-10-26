@@ -45,7 +45,7 @@ export class FileDriverConfigService implements LogOptionsFactory
      */
     createLogOptions (): Transport[]
     {
-        const dirname = join (__dirname, "../../", "storage/logs/");
+        const dirname = join (__dirname, "../../../", "storage/logs/");
 
         return [
 

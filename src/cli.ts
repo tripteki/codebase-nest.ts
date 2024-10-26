@@ -1,7 +1,7 @@
 "use strict";
 
 import { CommandFactory, } from "nest-commander";
-import { AppModule, } from "src/app/module";
+import { AppModule, } from "src/app/modules/module";
 
 /**
  * @returns {Promise<void>}

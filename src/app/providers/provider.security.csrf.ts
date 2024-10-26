@@ -1,6 +1,6 @@
 "use strict";
 
-import { AppProvider, } from "src/app/provider";
+import { AppProvider, } from "src/app/providers/provider";
 import { doubleCsrf, } from "csrf-csrf";
 
 /**

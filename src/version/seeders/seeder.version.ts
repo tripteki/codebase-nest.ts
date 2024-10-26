@@ -4,8 +4,8 @@ import { Command, CommandRunner, } from "nest-commander";
 import { InjectRepository, } from "@nestjs/typeorm";
 import { Repository, } from "typeorm";
 import { exit, } from "process";
-import { VersionEntity, } from "src/version/entity.version";
-import { versionFactory, } from "src/version/factory.version";
+import { VersionEntity, } from "src/version/entities/entity.version";
+import { versionFactory, } from "src/version/factories/factory.version";
 
 @Command ({ name: "version:seed", description: "Seed data.", })
 /**

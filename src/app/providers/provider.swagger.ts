@@ -1,6 +1,6 @@
 "use strict";
 
-import { AppProvider, } from "src/app/provider";
+import { AppProvider, } from "src/app/providers/provider";
 import { SwaggerModule, DocumentBuilder as SwaggerBuilder, } from "@nestjs/swagger";
 
 /**

@@ -1,7 +1,7 @@
 "use strict";
 
 import { registerAs, } from "@nestjs/config";
-import * as project from "../../package.json";
+import * as project from "../../../package.json";
 
 export default registerAs ("app", () => (
 {

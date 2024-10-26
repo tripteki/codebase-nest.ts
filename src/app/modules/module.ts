@@ -6,14 +6,15 @@ import { ConfigModule, } from "@nestjs/config";
 import { ServeStaticModule, } from "@nestjs/serve-static";
 import { CacheModule, } from "@nestjs/cache-manager";
 import { TypeOrmModule as DatabaseModule, } from "@nestjs/typeorm";
-import { VersionModule, } from "src/version/module.version";
+import { VersionModule, } from "src/version/modules/module.version";
 import { ConfigService, } from "@nestjs/config";
-import { RedisDriverConfigService, } from "src/app/driver.cache";
-import { MongoDriverConfigService, PostgreDriverConfigService, MariaDriverConfigService, } from "src/app/driver.database";
-import AppConfig from "src/app/config.app";
-import SwaggerConfig from "src/app/config.swagger";
-import CacheConfig from "src/app/config.cache";
-import DatabaseConfig from "src/app/config.database";
+import { RedisDriverConfigService, } from "src/app/drivers/driver.cache";
+import { MongoDriverConfigService, PostgreDriverConfigService, MariaDriverConfigService, } from "src/app/drivers/driver.database";
+import AppConfig from "src/app/configs/config.app";
+import SwaggerConfig from "src/app/configs/config.swagger";
+import LogConfig from "src/app/configs/config.log";
+import CacheConfig from "src/app/configs/config.cache";
+import DatabaseConfig from "src/app/configs/config.database";
 
 @Module ({
 
@@ -27,6 +28,7 @@ import DatabaseConfig from "src/app/config.database";
 
                 AppConfig,
                 SwaggerConfig,
+                LogConfig,
                 CacheConfig,
                 DatabaseConfig,
             ],
@@ -34,7 +36,7 @@ import DatabaseConfig from "src/app/config.database";
 
         ServeStaticModule.forRoot ({
 
-            rootPath: join (__dirname, "../../", "public/"),
+            rootPath: join (__dirname, "../../../", "public/"),
             serveRoot: "/",
             exclude: [
 

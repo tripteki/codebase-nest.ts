@@ -55,7 +55,6 @@ rdoc/
 rdocs/
 
 .env
-.env.*
 *-env.d.ts
 *.key
 *.debug*
