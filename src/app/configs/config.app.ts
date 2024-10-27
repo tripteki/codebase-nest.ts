@@ -92,5 +92,7 @@ export default registerAs ("app", () => (
     /**
      * Localization of application.
      */
-    locale: String (process.env.APP_LOCALE || "en_US"),
+    locale: String (process.env.APP_LOCALE || "en"),
+    fallbackLocale: String (process.env.APP_FALLBACK_LOCALE || "en"),
+    fakerLocale: String (process.env.APP_FAKER_LOCALE || "en_US"),
 }));

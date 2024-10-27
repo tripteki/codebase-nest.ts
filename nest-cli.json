@@ -8,6 +8,11 @@
 
         "builder": "swc",
         "typeCheck": true,
-        "deleteOutDir": true
+        "deleteOutDir": true,
+
+        "assets": [
+
+            { "include": "**/*.json", "watchAssets": true }
+        ]
     }
 }

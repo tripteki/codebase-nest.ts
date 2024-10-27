@@ -12,7 +12,7 @@ export const fakerHelper = (): any =>
     const
 
     appConfig = configHelper ("app"),
-    { faker, } = require (`@faker-js/faker/locale/${appConfig.locale}`);
+    { faker, } = require (`@faker-js/faker/locale/${appConfig.fakerLocale}`);
 
     return faker;
 };

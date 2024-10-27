@@ -6,8 +6,10 @@ import { ConfigModule, } from "@nestjs/config";
 import { ServeStaticModule, } from "@nestjs/serve-static";
 import { CacheModule, } from "@nestjs/cache-manager";
 import { TypeOrmModule as DatabaseModule, } from "@nestjs/typeorm";
+import { I18nModule, } from "nestjs-i18n";
 import { VersionModule, } from "src/version/modules/module.version";
 import { ConfigService, } from "@nestjs/config";
+import { I18nDriverConfigService, } from "src/app/drivers/driver.i18n";
 import { RedisDriverConfigService, } from "src/app/drivers/driver.cache";
 import { MongoDriverConfigService, PostgreDriverConfigService, MariaDriverConfigService, } from "src/app/drivers/driver.database";
 import AppConfig from "src/app/configs/config.app";
@@ -42,6 +44,18 @@ import DatabaseConfig from "src/app/configs/config.database";
 
                 "/api/*",
             ],
+        }),
+
+        I18nModule.forRootAsync ({
+
+            resolvers: I18nDriverConfigService.createI18nResolvers (),
+            imports: [ ConfigModule, ],
+            inject: [ ConfigService, ],
+
+            useFactory: async (configService: ConfigService) => ({
+
+                ... (await (new I18nDriverConfigService (configService).createI18nOptions ())),
+            }),
         }),
 
         CacheModule.registerAsync ({
