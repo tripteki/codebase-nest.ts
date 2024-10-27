@@ -49,6 +49,8 @@ export class I18nDriverConfigService implements I18nOptionsFactory
                 watch: true,
             },
 
+            viewEngine: "hbs",
+
             fallbackLanguage: this.configService.get<string> ("app.fallbackLocale"),
         };
     }

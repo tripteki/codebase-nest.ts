@@ -12,7 +12,8 @@
 
         "assets": [
 
-            { "include": "**/*.json", "watchAssets": true }
+            { "include": "**/*.json", "watchAssets": true },
+            { "include": "**/*.hbs", "watchAssets": true }
         ]
     }
 }

@@ -7,14 +7,17 @@ import { ServeStaticModule, } from "@nestjs/serve-static";
 import { CacheModule, } from "@nestjs/cache-manager";
 import { TypeOrmModule as DatabaseModule, } from "@nestjs/typeorm";
 import { I18nModule, } from "nestjs-i18n";
+import { MailerModule, } from "@nestjs-modules/mailer";
 import { VersionModule, } from "src/version/modules/module.version";
 import { ConfigService, } from "@nestjs/config";
 import { I18nDriverConfigService, } from "src/app/drivers/driver.i18n";
 import { RedisDriverConfigService, } from "src/app/drivers/driver.cache";
 import { MongoDriverConfigService, PostgreDriverConfigService, MariaDriverConfigService, } from "src/app/drivers/driver.database";
+import { HandlebarsDriverConfigService, } from "src/app/drivers/driver.mail";
 import AppConfig from "src/app/configs/config.app";
 import SwaggerConfig from "src/app/configs/config.swagger";
 import LogConfig from "src/app/configs/config.log";
+import MailConfig from "src/app/configs/config.mail";
 import CacheConfig from "src/app/configs/config.cache";
 import DatabaseConfig from "src/app/configs/config.database";
 
@@ -31,6 +34,7 @@ import DatabaseConfig from "src/app/configs/config.database";
                 AppConfig,
                 SwaggerConfig,
                 LogConfig,
+                MailConfig,
                 CacheConfig,
                 DatabaseConfig,
             ],
@@ -88,6 +92,13 @@ import DatabaseConfig from "src/app/configs/config.database";
             imports: [ ConfigModule, ],
             inject: [ ConfigService, ],
             useClass: MariaDriverConfigService,
+        }),
+
+        MailerModule.forRootAsync ({
+
+            imports: [ ConfigModule, ],
+            inject: [ ConfigService, ],
+            useClass: HandlebarsDriverConfigService,
         }),
 
         ... [
