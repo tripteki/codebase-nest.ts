@@ -11,7 +11,8 @@ import { AppModule, } from "src/app/modules/module";
     const
 
     app = await CommandFactory.run (
-        AppModule
+        AppModule,
+        [ "debug", ]
     );
 
 }) ();

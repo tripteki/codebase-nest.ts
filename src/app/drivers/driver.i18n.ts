@@ -32,7 +32,7 @@ export class I18nDriverConfigService implements I18nOptionsFactory
 
             { use: QueryResolver, options: [ "lang", ], },
             AcceptLanguageResolver,
-            new HeaderResolver([ "x-lang", ]),
+            new HeaderResolver ([ "x-lang", ]),
         ];
     }
 

@@ -22,6 +22,7 @@
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
         "test:e2e": "jest --testRegex='\\.e2e-spec\\.ts$' --coverage",
         "migrator": "npx typeorm-ts-node-commonjs --dataSource ./src/app/drivers/driver.database.ts",
+        "repl": "npm run start -- --watch --entryFile repl",
         "art": "npx ts-node ./dist/cli.js",
         "art:migration:create": "npx typeorm-ts-node-commonjs migration:create",
         "art:migration:status": "npm run migrator migration:show",
@@ -29,6 +30,9 @@
         "art:migration:down": "npm run migrator migration:revert",
         "art:migration:reset": "npm run migrator schema:drop"
     },
+
+    "strict": true,
+    "engines": { "node": ">=20.15.0" },
 
     "dependencies": {
 
@@ -38,10 +42,13 @@
         "cors": "^2.8.5",
         "nest-commander": "^3.15.0",
         "nestjs-i18n": "^10.4.9",
+
         "@nestjs/common": "^10.3.2",
         "@nestjs/config": "^3.1.1",
         "@nestjs/core": "^10.4.4",
         "@nestjs/platform-express": "^10.4.4",
+
+        "@nestjs/terminus": "^10.2.3",
         "@nestjs/throttler": "^6.2.1",
         "@nestjs/serve-static": "^4.0.0",
         "@nestjs/swagger": "^7.1.16",
@@ -57,6 +64,7 @@
         "nest-winston": "^1.9.7",
         "winston": "^3.15.0",
         "winston-daily-rotate-file": "^5.0.0",
+        "winston-elasticsearch": "^0.19.0",
         "nodemailer": "^6.9.15",
         "hbs": "^4.2.0",
         "bson": "^6.2.0",

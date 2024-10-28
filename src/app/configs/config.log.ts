@@ -1,7 +1,7 @@
 "use strict";
 
 import { registerAs, } from "@nestjs/config";
-import { ConsoleDriverConfigService, FileDriverConfigService, } from "src/app/drivers/driver.log";
+import { ConsoleDriverConfigService, FileDriverConfigService, ElasticSearchDriverConfigService, } from "src/app/drivers/driver.log";
 import * as winston from "winston";
 
 export default registerAs ("log", () => (
