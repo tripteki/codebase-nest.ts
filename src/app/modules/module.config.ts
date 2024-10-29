@@ -8,6 +8,8 @@ import LogConfig from "src/app/configs/config.log";
 import MailConfig from "src/app/configs/config.mail";
 import CacheConfig from "src/app/configs/config.cache";
 import DatabaseConfig from "src/app/configs/config.database";
+import HashConfig from "src/app/configs/config.hash";
+import ThrottleConfig from "src/app/configs/config.throttle";
 
 @Module ({
 
@@ -25,6 +27,7 @@ import DatabaseConfig from "src/app/configs/config.database";
                 MailConfig,
                 CacheConfig,
                 DatabaseConfig,
+                ThrottleConfig,
             ],
         }),
     ],

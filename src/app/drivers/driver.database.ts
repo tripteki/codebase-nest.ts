@@ -14,9 +14,9 @@ import configHelper from "../helpers/helper.config";
 abstract class DatabaseDriver
 {
     /**
-     * @returns {Object}
+     * @returns {Record<string, any>}
      */
-    protected createCommonOptions (): Object
+    protected createCommonOptions (): Record<string, any>
     {
         return {
 
@@ -66,7 +66,7 @@ export class SqliteDriverConfigService extends DatabaseDriver implements TypeOrm
             name: "sqliteConnection",
             type: "sqlite",
             ... this.createCommonOptions (),
-            ... this.configService.get<Object> ("database.sqlite"),
+            ... this.configService.get<Record<string, any>> ("database.sqlite"),
         };
     }
 };
@@ -101,7 +101,7 @@ export class MongoDriverConfigService extends DatabaseDriver implements TypeOrmO
             name: "mongoConnection",
             type: "mongodb",
             ... this.createCommonOptions (),
-            ... this.configService.get<Object> ("database.mongo"),
+            ... this.configService.get<Record<string, any>> ("database.mongo"),
         };
     }
 };
@@ -136,7 +136,7 @@ export class PostgreDriverConfigService extends DatabaseDriver implements TypeOr
             name: "postgreConnection",
             type: "postgres",
             ... this.createCommonOptions (),
-            ... this.configService.get<Object> ("database.postgre"),
+            ... this.configService.get<Record<string, any>> ("database.postgre"),
         };
     }
 };
@@ -171,7 +171,7 @@ export class MariaDriverConfigService extends DatabaseDriver implements TypeOrmO
             name: "mariaConnection",
             type: "mariadb",
             ... this.createCommonOptions (),
-            ... this.configService.get<Object> ("database.maria"),
+            ... this.configService.get<Record<string, any>> ("database.maria"),
         };
     }
 };
@@ -185,7 +185,9 @@ export const AppDataSource = (() =>
     const
 
     databaseConfig = configHelper ("database"),
-    migrator: string = process.env.MIGRATOR || "postgre";
+    migrator: string = process.env.MIGRATOR;
+
+    if (! migrator) throw new Error ("Migrator not defined.");
 
     return new DataSource ({
 

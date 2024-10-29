@@ -1,6 +1,6 @@
 "use strict";
 
-import configHelper from "src/app/helpers/helper.config";
+import configHelper from "./helper.config";
 
 /**
  * @function

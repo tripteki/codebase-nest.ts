@@ -22,17 +22,20 @@ export class AppSwaggerProvider extends AppProvider
      */
     public async boot (): Promise<void>
     {
-        const
+        if (this.configService.get<string> ("app.env") !== "production") {
 
-        swaggerService = SwaggerModule.createDocument (this.appService, ((new SwaggerBuilder ()).
-            setTitle (this.configService.get<string> ("swagger.title")).
-            setDescription (this.configService.get<string> ("swagger.description")).
-            setVersion (this.configService.get<string> ("swagger.version"))
-        .build ()));
+            const
 
-        SwaggerModule.setup ("api/" + this.configService.get<string> ("swagger.path"),
-            this.appService,
-            swaggerService
-        );
+            swaggerService = SwaggerModule.createDocument (this.appService, ((new SwaggerBuilder ()).
+                setTitle (this.configService.get<string> ("swagger.title")).
+                setDescription (this.configService.get<string> ("swagger.description")).
+                setVersion (this.configService.get<string> ("swagger.version"))
+            .build ()));
+
+            SwaggerModule.setup ("api/" + this.configService.get<string> ("swagger.path"),
+                this.appService,
+                swaggerService
+            );
+        }
     }
 };

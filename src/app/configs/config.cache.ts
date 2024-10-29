@@ -10,7 +10,7 @@ export default registerAs ("cache", () => (
     ttl: Number (5),
 
     /**
-     * Items.
+     * Cache accumulate.
      */
     max: Number (100),
 }));

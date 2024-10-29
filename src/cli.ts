@@ -12,7 +12,7 @@ import { AppModule, } from "src/app/modules/module";
 
     app = await CommandFactory.run (
         AppModule,
-        [ "debug", ]
+        [ "warn", ]
     );
 
 }) ();

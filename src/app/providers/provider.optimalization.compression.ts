@@ -1,13 +1,13 @@
 "use strict";
 
 import { AppProvider, } from "src/app/providers/provider";
-import helmet from "helmet";
+import * as compression from "compression";
 
 /**
  * @class
  * @extends {AppProvider}
  */
-export class AppSecurityHelmetProvider extends AppProvider
+export class AppOptimalizationCompressionProvider extends AppProvider
 {
     /**
      * @returns {Promise<void>}
@@ -22,6 +22,6 @@ export class AppSecurityHelmetProvider extends AppProvider
      */
     public async boot (): Promise<void>
     {
-        if (this.configService.get<string> ("app.env") === "production") this.appService.use (helmet ());
+        if (this.configService.get<string> ("app.env") === "production") this.appService.use (compression ({ threshold: 0, }));
     }
 };

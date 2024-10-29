@@ -1,13 +1,13 @@
 "use strict";
 
 import { AppProvider, } from "src/app/providers/provider";
-import helmet from "helmet";
+import { I18nValidationPipe, I18nValidationExceptionFilter, } from "nestjs-i18n";
 
 /**
  * @class
  * @extends {AppProvider}
  */
-export class AppSecurityHelmetProvider extends AppProvider
+export class AppI18nProvider extends AppProvider
 {
     /**
      * @returns {Promise<void>}
@@ -22,6 +22,7 @@ export class AppSecurityHelmetProvider extends AppProvider
      */
     public async boot (): Promise<void>
     {
-        if (this.configService.get<string> ("app.env") === "production") this.appService.use (helmet ());
+        this.appService.useGlobalPipes (new I18nValidationPipe ());
+        this.appService.useGlobalFilters (new I18nValidationExceptionFilter ());
     }
 };

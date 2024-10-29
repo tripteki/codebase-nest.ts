@@ -2,6 +2,7 @@
 
 import { registerAs, } from "@nestjs/config";
 import { ConsoleDriverConfigService, FileDriverConfigService, ElasticSearchDriverConfigService, } from "src/app/drivers/driver.log";
+import nowHelper from "src/app/helpers/helper.datetime";
 import * as winston from "winston";
 
 export default registerAs ("log", () => (
@@ -16,9 +17,9 @@ export default registerAs ("log", () => (
      */
     format: winston.format.combine (
 
-        winston.format.simple (),
-        winston.format.timestamp (),
         winston.format.errors ({ stack: true, }),
+        winston.format.timestamp ({ format: nowHelper (), }),
+        winston.format.logstash ()
     ),
 
     /**

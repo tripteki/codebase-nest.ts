@@ -34,6 +34,6 @@ export class AppSecurityCsrfProvider extends AppProvider
             getSecret: null,
         });
 
-        this.appService.use (doubleCsrfProtection);
+        if (this.configService.get<string> ("app.env") === "production") this.appService.use (doubleCsrfProtection);
     }
 };
