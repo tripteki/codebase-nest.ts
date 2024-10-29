@@ -30,7 +30,7 @@ export class InmemoryDriverConfigService implements CacheOptionsFactory
     {
         return {
 
-            ... this.configService.get<Object> ("cache"),
+            ... this.configService.get<Record<string, any>> ("cache"),
         };
     }
 };
@@ -61,7 +61,7 @@ export class RedisDriverConfigService implements CacheOptionsFactory
     {
         return {
 
-            ... this.configService.get<Object> ("cache"),
+            ... this.configService.get<Record<string, any>> ("cache"),
 
             store: await redisStore ({
 

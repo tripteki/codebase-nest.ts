@@ -1,6 +1,7 @@
 "use strict";
 
 import { Module, } from "@nestjs/common";
+import { AppThreadModule, } from "src/app/modules/module.thread";
 import { AppConfigModule, } from "src/app/modules/module.config";
 import { AppAssetModule, } from "src/app/modules/module.asset";
 import { AppI18nModule, } from "src/app/modules/module.i18n";
@@ -8,7 +9,10 @@ import { AppCacheModule, } from "src/app/modules/module.cache";
 import { AppDatabaseModule, } from "src/app/modules/module.database";
 import { AppMailModule, } from "src/app/modules/module.mail";
 import { AppHealthModule, } from "src/app/modules/module.health";
-import { VersionModule, } from "src/version/modules/module.version";
+import { AppThrottlerModule, } from "src/app/modules/module.throttle";
+import { AppEventListenerModule, } from "src/app/modules/module.event-listener";
+import { CommonModule, } from "src/v1/common/modules/module";
+import { AppController, } from "src/app/controllers/controller";
 
 @Module ({
 
@@ -21,11 +25,13 @@ import { VersionModule, } from "src/version/modules/module.version";
         AppDatabaseModule,
         AppMailModule,
         AppHealthModule,
+        AppThrottlerModule,
+        AppEventListenerModule,
 
         ... [
 
-            VersionModule,
-        ]
+            CommonModule,
+        ],
     ],
 
     providers: [
@@ -35,7 +41,7 @@ import { VersionModule, } from "src/version/modules/module.version";
 
     controllers: [
 
-        //
+        AppController,
     ],
 })
 /**

@@ -6,7 +6,7 @@ import { registerAs, } from "@nestjs/config";
 export default registerAs ("database", () => (
 {
     /**
-     * [See for more detail.](https://typeorm.io/data-source-options#sqlite-data-source-options).
+     * Database Source [See for more detail.](https://typeorm.io/data-source-options#sqlite-data-source-options).
      */
     sqlite: {
 
@@ -14,7 +14,7 @@ export default registerAs ("database", () => (
     },
 
     /**
-     * [See for more detail.](https://typeorm.io/data-source-options#mongodb-data-source-options).
+     * Database Source [See for more detail.](https://typeorm.io/data-source-options#mongodb-data-source-options).
      */
     mongo: {
 
@@ -24,7 +24,7 @@ export default registerAs ("database", () => (
     },
 
     /**
-     * [See for more detail.](https://typeorm.io/data-source-options#postgres--cockroachdb-data-source-options).
+     * Database Source [See for more detail.](https://typeorm.io/data-source-options#postgres--cockroachdb-data-source-options).
      */
     postgre: {
 
@@ -34,7 +34,7 @@ export default registerAs ("database", () => (
     },
 
     /**
-     * [See for more detail.](https://typeorm.io/data-source-options#mysql--mariadb-data-source-options).
+     * Database Source [See for more detail.](https://typeorm.io/data-source-options#mysql--mariadb-data-source-options).
      */
     maria: {
 

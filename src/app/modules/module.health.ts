@@ -15,7 +15,7 @@ import { TerminusModule, } from "@nestjs/terminus";
 
     exports: [
 
-        //
+        TerminusModule,
     ],
 })
 /**
