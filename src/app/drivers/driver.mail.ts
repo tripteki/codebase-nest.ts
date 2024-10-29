@@ -20,7 +20,7 @@ export class HandlebarsDriverConfigService implements MailerOptionsFactory
      */
     constructor (
         private readonly configService: ConfigService,
-        private readonly i18nService: I18nService,
+        private readonly i18nService: I18nService
     )
     {
         //
@@ -43,7 +43,7 @@ export class HandlebarsDriverConfigService implements MailerOptionsFactory
                 options: { strict: true, },
             },
 
-            ... this.configService.get<Object> ("mail"),
+            ... this.configService.get<Record<string, any>> ("mail"),
         };
     }
 };

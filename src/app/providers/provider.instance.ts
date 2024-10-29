@@ -1,7 +1,9 @@
 "use strict";
 
 import { AppProvider, } from "src/app/providers/provider";
-import { VersioningType, } from "@nestjs/common";
+import { VersioningType, ValidationPipe, } from "@nestjs/common";
+import { useContainer, } from "class-validator";
+import { AppModule, } from "src/app/modules/module";
 
 /**
  * @class
@@ -23,6 +25,7 @@ export class AppInstanceProvider extends AppProvider
     public async boot (): Promise<void>
     {
         this.provideRoute ();
+        this.provideValidation ();
     }
 
     /**
@@ -31,6 +34,15 @@ export class AppInstanceProvider extends AppProvider
     protected provideRoute (): void
     {
         this.appService.setGlobalPrefix ("api");
-        this.appService.enableVersioning ({ type: VersioningType.URI, });
+        this.appService.enableVersioning ();
+    }
+
+    /**
+     * @returns {void}
+     */
+    protected provideValidation (): void
+    {
+        useContainer (this.appService.select (AppModule), { fallbackOnErrors: true, });
+        this.appService.useGlobalPipes (new ValidationPipe ({ transform: true, }));
     }
 };

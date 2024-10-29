@@ -22,6 +22,6 @@ export class AppSecurityCorsProvider extends AppProvider
      */
     public async boot (): Promise<void>
     {
-        this.appService.enableCors (this.configService.get<CorsOptions> ("app.cors"));
+        if (this.configService.get<string> ("app.env") === "production") this.appService.enableCors (this.configService.get<CorsOptions> ("app.cors"));
     }
 };

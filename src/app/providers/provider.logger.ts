@@ -31,7 +31,7 @@ class LogConfigService implements WinstonModuleOptionsFactory
 
             handleExceptions: true,
 
-            ... this.configService.get<Object> ("log"),
+            ... this.configService.get<Record<string, any>> ("log"),
         };
     }
 };

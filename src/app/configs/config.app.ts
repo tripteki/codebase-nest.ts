@@ -88,6 +88,7 @@ export default registerAs ("app", () => (
      * Timezone of application.
      */
     timezone: String (process.env.TZ || "UTC"),
+    datetimeFormat: "YYYY-MM-DD HH:mm:ss",
 
     /**
      * Localization of application.
