@@ -1,9 +1,9 @@
 {
     "name": "codebase",
-    "version": "0.0.1",
-    "description": "",
-    "author": "Anonymous <anonymous@email.com>",
+    "version": "1.0.1",
     "private": true,
+    "description": "Project",
+    "author": "Anonymous <anonymous@email.com>",
     "license": "UNLICENSED",
 
     "scripts": {
