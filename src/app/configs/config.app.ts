@@ -8,12 +8,12 @@ export default registerAs ("app", () => (
     /**
      * Application name.
      */
-    name: String (project.name || process.env.APP_NAME || "Basecode"),
+    name: String (process.env.APP_NAME || project.name || "Basecode"),
 
     /**
      * Version of application.
      */
-    version: String (project.version || process.env.APP_VERSION || "1.0.0"),
+    version: String (process.env.APP_VERSION || project.version || "1.0.0"),
 
     //
 
