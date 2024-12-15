@@ -1,0 +1,13 @@
+{
+    "sourceRoot": "app",
+    "serverFile": "bootstrap/main",
+
+    "debug": true,
+
+    "compilerOptions": {
+
+        "builder": "swc",
+        "typeCheck": true,
+        "deleteOutDir": true
+    }
+}

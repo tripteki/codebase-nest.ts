@@ -1,0 +1,6 @@
+#!/usr/bin/env node
+
+const instance = require ("ts-node").
+                 register ();
+
+const consoleOutputInput = require ("./bin/console");
