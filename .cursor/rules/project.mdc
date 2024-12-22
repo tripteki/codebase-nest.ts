@@ -1,0 +1,154 @@
+---
+description: Core NestJS project conventions (structure, API contract, env, tests)
+alwaysApply: true
+---
+
+# NestJS — Project Conventions
+
+This is the **NestJS 10** backend in the Tripteki parallel-codebase family. It shares the same domain model, API contract, and event names with FastAPI and Laravel siblings.
+
+## Stack
+
+| Layer | Choice |
+|-------|--------|
+| Framework | NestJS 10 + TypeScript (strict, SWC builder) |
+| Runtime | **Bun** (`bun run`); README may still reference npm |
+| ORM | Prisma — PostgreSQL (migrations) + MongoDB (`db push`) |
+| Cache/Queue | Redis — cache, Bull job queues |
+| REST | Swagger at `/api/docs` |
+| GraphQL | Apollo at `/graphql` |
+| WebSockets | Socket.IO — room-based emits to `user.{id}` |
+| Auth | JWT — access + refresh tokens |
+| Mail | Handlebars templates via Nest mailer |
+| i18n | nest-i18n |
+| Scheduler | `@nestjs/schedule` |
+
+## Directory layout
+
+```
+src/
+  app/                          # Infrastructure layer
+    configs/                    # registerAs config modules
+    providers/                  # Boot providers (AppHttpProvider, etc.)
+    drivers/                    # External service drivers
+    databases/                  # Prisma clients
+    helpers/                    # Shared utilities
+    langs/                      # i18n files
+  v1/
+    api/{domain}/               # REST domain modules
+      controllers/
+      services/
+      repositories/
+      dtos/                     # validator, transformer, enum
+      events/
+      listeners/
+      processors/               # Bull queue processors
+      middlewares/
+      modules/
+      databases/
+      views/                    # Email templates
+    graphql/{domain}/           # Parallel GraphQL stack
+      resolvers/
+      services/
+      dtos/
+      middlewares/
+      modules/
+test/                           # E2E tests only (*.e2e-spec.ts)
+  test.case.ts                  # setupTestApp, setupAuthTestApp
+storage/logs/
+public/
+```
+
+## Naming conventions
+
+| Artifact | Convention | Example |
+|----------|-----------|---------|
+| File | dot-separated lowercase | `user.auth.service.ts` |
+| Class | PascalCase | `UserAuthService` |
+| Event | PascalCase + Event suffix | `UserAuthLoggedInEvent` |
+| Validator DTO | `*.validator.dto.ts` | `user.validator.dto.ts` |
+| Transformer DTO | `*.transformer.dto.ts` | `user.transformer.dto.ts` |
+| Enum | `*.enum.ts` | `user-role.enum.ts` |
+| Import path | Absolute from `src/` | `import { X } from 'src/app/...'` |
+
+No `@` path alias in tsconfig — always use `src/...` imports.
+
+## Shared API contract (all backends)
+
+### Endpoints
+- REST base: `/api/v1`
+- Swagger docs: `/api/docs`
+- GraphQL: `/graphql`
+- Health/status: `/api/status`
+
+### Auth
+- `POST /api/v1/auth/login` — returns `{ access_token, refresh_token, token_type, expires_in }`
+- `POST /api/v1/auth/refresh` — accepts `{ refresh_token }` or cookie
+- `POST /api/v1/auth/register`, `POST /api/v1/auth/logout`
+- `GET /api/v1/auth/profile` — returns user profile
+- Login supports `remember` flag for extended refresh token
+
+### Error responses
+```json
+// Validation (HTTP 422)
+{ "detail": [{ "loc": ["body", "email"], "msg": "...", "type": "..." }] }
+
+// General (HTTP 4xx/5xx)
+{ "message": "Human-readable error" }
+```
+
+### Pagination
+```json
+{
+  "data": [...],
+  "meta": { "total": 100, "per_page": 15, "current_page": 1, "last_page": 7 },
+  "links": { "first": "...", "last": "...", "prev": null, "next": "..." }
+}
+```
+
+### Rate limiting
+- Throttle/rate-limit applies in **production only** (`NODE_ENV=production`)
+- Do not throttle in development or tests
+
+## Environment variables
+
+```
+APP_NAME, APP_SECRET, APP_PORT, APP_ENV, APP_LOCALE, APP_TIMEZONE
+FRONTEND_URL
+NODE_ENV
+MEMORY_REDIS_HOST, MEMORY_REDIS_PORT, MEMORY_REDIS_PASSWORD
+DATABASE_POSTGRE_URI, DATABASE_MONGO_URI
+MAIL_URI
+SWAGGER_TITLE, SWAGGER_DESCRIPTION, SWAGGER_VERSION
+```
+
+Config loaded via `@nestjs/config` `registerAs()` in `src/app/configs/`.
+
+## Setup commands
+
+```bash
+bun install
+bun run prisma              # Generate Prisma clients
+bun run postgre:migrate     # PostgreSQL migrations
+bun run mongo:migrate       # MongoDB schema push
+bun run dev                 # Start dev server
+bun run build               # Production build
+```
+
+## Testing
+
+```bash
+bun test                    # Jest e2e watch mode
+bun run test:e2e            # Jest e2e with coverage
+```
+
+- **E2E only** — no unit test suite; do not add unit tests unless requested
+- **Requires Redis** running at `127.0.0.1:6379` for e2e tests
+- Default test user: `user@mail.com` / `12345678`
+- Helpers: `setupTestApp()`, `setupAuthTestApp()` in `test/test.case.ts`
+
+## Lint
+
+```bash
+bun run lint    # Prettier + ESLint (@tripteki/eslint-config, @tripteki/prettier-config)
+```

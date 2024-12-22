@@ -1,0 +1,10 @@
+{
+    "select": "{context} has been successfully selected.",
+    "index": "{context} has been successfully indexed.",
+    "show": "{context} has been successfully displayed.",
+    "store": "{context} has been successfully stored.",
+    "destroy": "{context} has been successfully deleted.",
+    "restore": "{context} has been successfully restored.",
+    "import": "{context} has been successfully imported.",
+    "export": "{context} has been successfully exported."
+}

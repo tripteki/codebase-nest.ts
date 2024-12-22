@@ -1,0 +1,119 @@
+---
+description: NestJS module patterns — bootstrapping, events, DTOs, GraphQL, Swagger
+globs: "src/**/*.ts"
+alwaysApply: false
+---
+
+# NestJS Implementation Patterns
+
+## Application bootstrapping
+
+`main.ts` chains providers — do not inline boot logic:
+
+```typescript
+AppHttpProvider.register()
+  .then(() => AppLogProvider.boot())
+  .then(() => AppDatabaseProvider.boot())
+  // ... additional providers
+```
+
+- Each provider in `src/app/providers/` owns one concern
+- Config modules use `registerAs('key', () => ({ ... }))` in `src/app/configs/`
+
+## Domain module structure
+
+Each domain under `src/v1/api/{domain}/` follows this layering:
+
+```
+Controller → Service → Repository → Database (Prisma)
+     ↓
+   DTO (validator for input, transformer for output)
+     ↓
+   Event → Listener (side effects, broadcasts)
+     ↓
+   Processor (async Bull queue jobs)
+```
+
+- Controllers: thin — delegate to services, apply decorators
+- Services: business logic, emit events
+- Repositories: database queries only
+- Never put business logic in controllers or repositories
+
+## Event-driven architecture
+
+```typescript
+// Emit
+this.eventEmitter.emit('v1.user.admin.imported', payload);
+
+// Listen
+@OnEvent('v1.user.admin.imported')
+handleImported(event: UserAdminImportedEvent) {
+  // Side effects: broadcast, log, queue
+}
+```
+
+### Event naming convention
+- Format: `v1.{domain}.{action}` — e.g. `v1.user.admin.imported`
+- Must match FastAPI and Laravel event names exactly
+
+### Realtime broadcasts
+- Socket.IO emits to room `user.{id}`
+- Event payload prefix: `v1.user.admin.*`
+- Listeners in `listeners/` directory handle broadcast after domain events
+
+## DTO patterns
+
+```typescript
+// Input validation
+export class UserLoginValidatorDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+
+// Output transformation
+export class UserTransformerDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  email: string;
+}
+```
+
+- **Validator DTOs:** class-validator decorators, used with `ValidationPipe`
+- **Transformer DTOs:** shape API responses, decorated with `@ApiProperty` for Swagger
+- **Enums:** separate `*.enum.ts` files
+
+## Swagger documentation
+
+- Use custom swagger decorators on controllers
+- Every response DTO property needs `@ApiProperty()` or `@ApiPropertyOptional()`
+- Group endpoints by domain tags (e.g. `User`, `UserAuth`, `Notification`)
+
+## GraphQL (parallel stack)
+
+- Resolvers in `src/v1/graphql/{domain}/resolvers/`
+- Share service layer with REST — do not duplicate business logic
+- Separate DTOs for GraphQL input/output types
+- Middleware for auth context in `middlewares/`
+
+## Bull queue processors
+
+- Processors in `processors/` handle async jobs (import/export)
+- Queue names: `user-admin-queue` (and domain-specific queues)
+- Emit events after processing completes
+
+## Common pitfalls (avoid)
+
+| Problem | Fix |
+|---------|-----|
+| E2E fails with ECONNREFUSED 6379 | Start Redis before running tests |
+| Business logic in controller | Move to service layer |
+| Different error shape than siblings | Return `{ detail: [...] }` for 422 |
+| Throttle in development | Guard with `NODE_ENV === 'production'` |
+| `@/` imports | Use `src/...` absolute paths |
+| Duplicate logic in GraphQL resolver | Call shared service method |
