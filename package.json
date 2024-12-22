@@ -1,0 +1,147 @@
+{
+    "name": "codebase",
+    "version": "1.0.1",
+    "private": true,
+    "description": "Project",
+    "license": "UNLICENSED",
+
+    "strict": true,
+    "engines": { "node": ">=20.15.0" },
+
+    "scripts": {
+
+        "doc": "bunx @compodoc/compodoc -p tsconfig.json -d public/documentation --hideDarkModeToggle --hideGenerator --disableDependencies --disableSourceCode --disableTemplateTab --disableStyleTab",
+        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+        "lint": "bun run format && eslint \"{src,test}/**/*.ts\" --fix",
+        "prisma": "bun run postgre && bun run mongo",
+        "postgre": "bunx prisma generate --schema=./src/app/databases/postgre.schema.prisma",
+        "postgre:migrate": "bunx prisma migrate dev --schema=./src/app/databases/postgre.schema.prisma",
+        "postgre:status": "bunx prisma migrate status --schema=./src/app/databases/postgre.schema.prisma",
+        "mongo": "bunx prisma generate --schema=./src/app/databases/mongo.schema.prisma",
+        "mongo:migrate": "bunx prisma db push --schema=./src/app/databases/mongo.schema.prisma",
+        "build": "nest build",
+        "start": "nest start",
+        "repl": "bun run start -- --watch --entryFile repl",
+        "cli": "bun run build && bun ./dist/cli.js",
+        "dev": "NODE_ENV=local nest start --debug --watch",
+        "prod": "bun run build && NODE_ENV=production bun ./dist/main",
+        "test": "bun run test:e2e --watch",
+        "test:e2e": "jest --config test/jest-e2e.json --testRegex='\\.e2e-spec\\.ts$' --passWithNoTests --coverage",
+        "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+
+        "postinstall": "bun run prisma"
+    },
+
+    "dependencies": {
+
+        "reflect-metadata": "^0.2.1",
+        "rxjs": "^7.8.1",
+        "@nestjs/common": "^10.3.2",
+        "@nestjs/core": "^10.4.4",
+        "@nestjs/event-emitter": "^2.1.1",
+        "@nestjs/websockets": "^10.4.15",
+        "@nestjs/platform-express": "^10.4.4",
+        "@nestjs/platform-socket.io": "^10.4.15",
+        "@nestjs/schedule": "^4.1.2",
+        "@nestjs/bull": "^10.2.3",
+        "@nestjs/config": "^3.3.0",
+        "@nestjs/throttler": "^6.3.0",
+        "@nestjs/serve-static": "^4.0.2",
+        "@nestjs/cache-manager": "^2.3.0",
+        "cache-manager": "^5.7.6",
+        "cache-manager-redis-yet": "^5.1.5",
+        "@prisma/client": "^6.1.0",
+        "@nestjs/terminus": "^10.2.3",
+        "nest-winston": "^1.9.7",
+        "@nestjs-modules/mailer": "^2.0.2",
+        "nestjs-i18n": "^10.5.0",
+        "@nestjs/swagger": "^8.1.0",
+        "@nestjs/graphql": "^12.2.2",
+        "graphql": "^16.10.0",
+        "@nestjs/apollo": "^12.2.2",
+        "@apollo/server": "^4.11.2",
+
+        "@nestjs/jwt": "^11.0.0",
+
+        "uuid": "^11.0.4",
+        "ulid": "^2.3.0",
+        "@faker-js/faker": "^9.3.0",
+        "@vicgutt/strjs": "^0.1.6",
+        "underscore": "^1.13.7",
+        "moment-timezone": "^0.5.46",
+        "bcrypt": "^5.1.1",
+        "argon2": "^0.41.1",
+        "signed": "^2.1.0",
+
+        "nodemailer": "^6.9.16",
+        "winston": "^3.17.0",
+        "winston-daily-rotate-file": "^5.0.0",
+        "winston-elasticsearch": "^0.19.0",
+        "bull": "^4.16.5",
+        "cors": "^2.8.5",
+        "csrf-csrf": "^3.1.0",
+        "helmet": "^8.0.0",
+        "compression": "^1.7.5",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.14.1",
+        "zod": "^3.24.2",
+        "nest-commander": "^3.15.0",
+        "hbs": "^4.2.0",
+        "xlsx": "^0.18.5",
+        "pdfkit": "^0.17.0"
+    },
+
+    "devDependencies": {
+
+        "@compodoc/compodoc": "^1.1.26",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "@tripteki/eslint-config": "^1.3.12",
+        "@tripteki/prettier-config": "^1.0.0",
+        "@types/node": "^20.11.16",
+        "@types/express": "^4.17.21",
+        "@types/multer": "^1.4.12",
+        "@types/nodemailer": "^6.4.17",
+        "@types/supertest": "^6.0.2",
+        "@types/jest": "^29.5.12",
+        "@swc/core": "^1.10.1",
+        "@swc/cli": "^0.4.0",
+        "@swc/jest": "^0.2.37",
+        "@nestjs/schematics": "^10.1.0",
+        "@nestjs/cli": "^10.4.5",
+        "@nestjs/testing": "^10.3.2",
+        "@types/cache-manager-redis-store": "^2.0.4",
+        "prisma": "^6.1.0",
+        "eslint": "^8.56.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.1.3",
+        "prettier": "^3.2.5",
+        "source-map-support": "^0.5.21",
+        "supertest": "^6.3.4",
+        "jest": "^29.7.0",
+        "ts-loader": "^9.5.1",
+        "ts-node": "^10.9.2",
+        "ts-jest": "^29.1.2",
+        "tsconfig-paths": "^4.2.0",
+        "typescript": "^5.3.3"
+    },
+
+    "futureDependencies": {
+
+        "test|@playwright/test": "^1.51.1",
+
+        "data|puppeteer": "^24.4.0",
+
+        "visualization|d3": "^7.9.0",
+
+        "ai|transformers|@llm-tools/embedjs": "^0.1.28",
+        "ml|scikit-learn|@tensorflow/tfjs-node-gpu": "^4.22.0",
+        "dl|pytorch-keras|brain.js": "^2.0.0-beta.24",
+
+        "web3|bitcoinjs-lib": "^6.1.7", "web3|ecpair": "^3.0.0", "web3|bip32": "^5.0.0-rc.0",
+        "web3|solidity|ethers": "^6.13.5",
+        "web3|rust|@solana/kit": "^2.1.0",
+        "web3|deso-protocol": "^3.3.8",
+        "web3-exchange|ccxt": "^4.4.69"
+    }
+}
