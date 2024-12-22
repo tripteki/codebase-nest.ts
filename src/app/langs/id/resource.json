@@ -1,0 +1,10 @@
+{
+    "select": "{context} telah berhasil dipilih.",
+    "index": "{context} telah berhasil diindeks.",
+    "show": "{context} telah berhasil ditampilkan.",
+    "store": "{context} telah berhasil disimpan.",
+    "destroy": "{context} telah berhasil dihapus.",
+    "restore": "{context} telah berhasil dipulihkan.",
+    "import": "{context} telah berhasil diimpor.",
+    "export": "{context} telah berhasil diekspor."
+}

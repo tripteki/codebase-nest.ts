@@ -1,0 +1,16 @@
+{
+    "moduleFileExtensions": [
+
+        "yml",
+        "json",
+        "js",
+        "ts"
+    ],
+
+    "rootDir": ".",
+    "transform": { "^.+\\.(t|j)s?$": "@swc/jest" },
+    "testEnvironment": "node",
+    "testRegex": ".*\\.spec\\.ts$",
+    "collectCoverageFrom": [ "**/*.(t|j)s" ],
+    "coverageDirectory": "../coverage"
+}

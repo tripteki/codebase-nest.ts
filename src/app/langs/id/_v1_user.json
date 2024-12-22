@@ -1,0 +1,75 @@
+{
+    "common": {
+        "close_greeting": "Salam. {appName}.",
+        "start_greeting": "Halo {name}!",
+        "yes": "Ya",
+        "no": "Tidak"
+    },
+
+    "account_activated": {
+        "subject": "Akun Anda Telah Diaktifkan",
+        "line": "Kami dengan senang hati memberitahukan Anda bahwa akun Anda telah berhasil diaktifkan.",
+        "thank_you": "Terima kasih telah menjadi bagian dari komunitas kami!"
+    },
+
+    "account_deactivated": {
+        "subject": "Akun Anda Telah Dinonaktifkan",
+        "line": "Kami menyesal memberitahukan Anda bahwa akun Anda telah dinonaktifkan. Jika Anda merasa ini adalah kesalahan, harap hubungi dukungan.",
+        "thank_you": "Kami berharap dapat menyelesaikan masalah ini sesegera mungkin."
+    },
+
+    "account_registered": {
+        "subject": "Proses Verifikasi Akun Anda",
+        "line1": "Silahkan klik tombol link di bawah untuk verifikasi alamat email Anda.",
+        "line2": "Jika Anda tidak merasa membuat akun lewatkan saja proses ini.",
+        "verify": "Verifikasi Alamat E-Mail"
+    },
+
+    "account_reset": {
+        "subject": "Proses Reset Kata Sandi Akun Anda",
+        "line1": "Silakan klik tombol tautan di bawah ini untuk mereset kata sandi Anda.",
+        "line2": "Jika Anda tidak mereset kata sandi, mohon abaikan proses ini.",
+        "reset": "Reset Kata Sandi"
+    },
+
+    "export": {
+        "started": {
+            "message": "Ekspor telah dimulai. Anda akan menerima notifikasi ketika siap."
+        },
+        "completed": {
+            "message": "Ekspor pengguna Anda telah berhasil diselesaikan."
+        },
+        "failed": {
+            "message": "Ekspor pengguna Anda gagal."
+        },
+        "sheet_name": "Pengguna",
+        "column": {
+            "id": "ID",
+            "name": "Nama",
+            "email": "Email",
+            "email_verified": "Email Terverifikasi",
+            "created_at": "Dibuat Pada",
+            "updated_at": "Diperbarui Pada"
+        }
+    },
+    "import": {
+        "started": {
+            "message": "Impor telah dimulai. Anda akan menerima notifikasi ketika siap."
+        },
+        "completed": {
+            "message": "Impor pengguna Anda telah berhasil diselesaikan. {totalImported} diimpor, {totalSkipped} dilewati."
+        },
+        "failed": {
+            "message": "Impor pengguna Anda gagal."
+        },
+        "column": {
+            "id": "ID",
+            "name": "Nama",
+            "email": "Email",
+            "password": "Kata Sandi",
+            "email_verified": "Email Terverifikasi",
+            "created_at": "Dibuat Pada",
+            "updated_at": "Diperbarui Pada"
+        }
+    }
+}
