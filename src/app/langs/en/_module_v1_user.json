@@ -1,0 +1,15 @@
+{
+    "account_activated": {
+        "greeting": "Hello {name}!",
+        "subject": "Your Account Has Been Activated",
+        "line": "We are excited to let you know that your account has been successfully activated.",
+        "thank_you": "Thank you for being a part of our community!"
+    },
+
+    "account_deactivated": {
+        "greeting": "Hello {name}!",
+        "subject": "Your Account Has Been Deactivated",
+        "line": "We regret to inform you that your account has been deactivated. If you think this is a mistake, please contact support.",
+        "thank_you": "We hope to resolve this issue as soon as possible."
+    }
+}

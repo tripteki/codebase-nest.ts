@@ -1,0 +1,33 @@
+generator mongo {
+
+    provider = "prisma-client-js"
+    output   = "../../../node_modules/@prisma/mongo/client"
+}
+
+datasource mongo {
+
+    provider = "mongodb"
+    url      = env ("DATABASE_MONGO_URI")
+}
+
+model Log {
+
+    @@map ("logs")
+
+    id                  String      @id @default (auto ()) @map ("_id") @mongo.ObjectId
+    level               Level
+    state               Json
+    created_at          DateTime
+    updated_at          DateTime
+    deleted_at          DateTime?
+}
+
+enum Level {
+
+    LOG
+    FATAL
+    ERROR
+    WARN
+    DEBUG
+    VERBOSE
+}
