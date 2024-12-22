@@ -1,0 +1,15 @@
+{
+    "account_activated": {
+        "greeting": "Halo {name}!",
+        "subject": "Akun Anda Telah Diaktifkan",
+        "line": "Kami dengan senang hati memberitahukan Anda bahwa akun Anda telah berhasil diaktifkan.",
+        "thank_you": "Terima kasih telah menjadi bagian dari komunitas kami!"
+    },
+
+    "account_deactivated": {
+        "greeting": "Halo {name}!",
+        "subject": "Akun Anda Telah Dinonaktifkan",
+        "line": "Kami menyesal memberitahukan Anda bahwa akun Anda telah dinonaktifkan. Jika Anda merasa ini adalah kesalahan, harap hubungi dukungan.",
+        "thank_you": "Kami berharap dapat menyelesaikan masalah ini sesegera mungkin."
+    }
+}
