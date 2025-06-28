@@ -28,8 +28,9 @@ export class UserSeeder implements Seeder
      */
     public async run (): Promise<void>
     {
-        await this.prismaPostgreService.user.create ({
-            data: await this.userFactory.definition (),
-        });
+        console.log (
+            await this.prismaPostgreService.user.create ({
+                data: await this.userFactory.definition (),
+        }));
     }
 }

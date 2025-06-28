@@ -6,6 +6,7 @@ import { OffsetPaginationType, CursorPaginationType, OffsetPagination, CursorPag
 import { AppApiOrderQueryStringDecorator, AppOrderQueryStringDecorator, } from "src/app/decorators/app.order.decorator";
 import { AppApiFilterQueryStringDecorator, AppFilterQueryStringDecorator, } from "src/app/decorators/app.filter.decorator";
 import { AppApiCurrentPageQueryStringDecorator, AppApiLimitPageQueryStringDecorator, AppLimitPageQueryStringDecorator, AppCurrentPageQueryStringDecorator, } from "src/app/decorators/app.page.decorator";
+import { AppApiFileDecorator, AppFileDecorator, } from "src/app/decorators/app.file.decorator";
 import { AppApiIndexCrudSpecDecorator, AppApiDestroyCrudSpecDecorator, AppApiShowCrudSpecDecorator, AppApiStoreCrudSpecDecorator, AppApiUpdateCrudSpecDecorator, } from "src/app/decorators/app.crud.decorator";
 import { ConfigService, } from "@nestjs/config";
 import { UserAdminService, } from "src/v1/api/user/services/user.admin.service";
@@ -284,6 +285,64 @@ export class UserAdminController
         return await this.userAdminService.verify (
             { userId: request["user"].sub, },
             parameters
+        );
+    }
+
+    @Post ("/import")
+    @HttpCode (Status.OK)
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UserAuthAccessTokenMetadataMiddleware ()
+    @AppApiFileDecorator ("file", __dirname + "/../../../../../storage/disks/public/")
+    @ApiBearerAuth ()
+    @ApiResponse ({
+        status: Status.UNAUTHORIZED,
+        description: Message.UNAUTHORIZED,
+    })
+    @ApiResponse ({
+        status: Status.FORBIDDEN,
+        description: Message.UNVERIFIED,
+    })
+    /**
+     * @param {Request} request
+     * @param {Response} response
+     * @param {File} file
+     * @returns {Promise<string>}
+     */
+    public async import (
+        @Req () request: Request,
+        @AppFileDecorator () file: Express.Multer.File
+    ): Promise<string>
+    {
+        return await this.userAdminService.import (
+            { userId: request["user"].sub, },
+            file.filename
+        );
+    }
+
+    @Post ("/export")
+    @HttpCode (Status.OK)
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UserAuthAccessTokenMetadataMiddleware ()
+    @ApiBearerAuth ()
+    @ApiResponse ({
+        status: Status.UNAUTHORIZED,
+        description: Message.UNAUTHORIZED,
+    })
+    @ApiResponse ({
+        status: Status.FORBIDDEN,
+        description: Message.UNVERIFIED,
+    })
+    /**
+     * @param {Request} request
+     * @param {Response} response
+     * @returns {Promise<string>}
+     */
+    public async export (
+        @Req () request: Request
+    ): Promise<string>
+    {
+        return await this.userAdminService.export (
+            { userId: request["user"].sub, }
         );
     }
 }

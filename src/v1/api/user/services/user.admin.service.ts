@@ -1,6 +1,7 @@
 import { Injectable, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
 import { EventEmitter2 as EventListenerService, } from "@nestjs/event-emitter";
+import { InjectQueue, } from "@nestjs/bull";
 import { AppService, } from "src/app/services/app.service";
 import { OffsetPaginationType, CursorPaginationType, OffsetPagination, CursorPagination, Orderization, Filterization, } from "src/app/repositories/app.repository";
 import { UserAdminActivatedEvent, } from "src/v1/api/user/events/user.admin.activated.event";
@@ -8,6 +9,7 @@ import { UserAdminDeactivatedEvent, } from "src/v1/api/user/events/user.admin.de
 import { UserAdminRepository, } from "src/v1/api/user/repositories/user.admin.repository";
 import { UserAuthIdentifierTransformerDto, UserTransformerDto, } from "src/v1/api/user/dtos/user.transformer.dto";
 import { UserIdentifierDto, UserUpdateValidatorDto, UserCreateValidatorDto, } from "src/v1/api/user/dtos/user.validator.dto";
+import { Queue, } from "bull";
 import { plainToClass, } from "class-transformer";
 
 @Injectable ()
@@ -20,12 +22,14 @@ export class UserAdminService extends AppService
     /**
      * @param {ConfigService} configService
      * @param {EventListenerService} eventListenerService
+     * @param {Queue} userAdminQueue
      * @param {UserAdminRepository} userAdminRepository
      * @returns {void}
      */
     constructor (
         protected readonly configService: ConfigService,
         protected readonly eventListenerService: EventListenerService,
+        @InjectQueue ("user-admin-queue") protected readonly userAdminQueue: Queue,
         protected readonly userAdminRepository: UserAdminRepository
     )
     {
@@ -214,5 +218,31 @@ export class UserAdminService extends AppService
 
             return error.message;
         }
+    }
+
+    /**
+     * @param {UserAuthIdentifierTransformerDto} userId
+     * @param {string} file
+     * @returns {Promise<string>}
+     */
+    public async import (
+        { userId, }: UserAuthIdentifierTransformerDto,
+        file: string
+    ): Promise<string>
+    {
+        await this.userAdminQueue.add ({ userId, file, });
+
+        return file;
+    }
+
+    /**
+     * @param {UserAuthIdentifierTransformerDto} userId
+     * @returns {Promise<string>}
+     */
+    public async export (
+        { userId, }: UserAuthIdentifierTransformerDto
+    ): Promise<string>
+    {
+        return userId;
     }
 }

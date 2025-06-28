@@ -1,12 +1,8 @@
 "use strict";
 
-import { Express, Request, Response, } from "express";
-import { FileInterceptor, } from "@nestjs/platform-express";
-import { applyDecorators, UseInterceptors, } from "@nestjs/common";
-import { ApiConsumes, ApiParam, ApiBody, ApiResponse, } from "@nestjs/swagger";
+import { applyDecorators, } from "@nestjs/common";
+import { ApiParam, ApiBody, ApiResponse, } from "@nestjs/swagger";
 import { Status, Message, } from "src/app/dtos/app.dto";
-import { diskStorage, } from "multer";
-import { extname, } from "path";
 
 /**
  * @function {AppApiIndexCrudSpecDecorator}
@@ -136,49 +132,6 @@ export function AppApiDestroyCrudSpecDecorator (
         ApiResponse ({
             status: Status.BAD_REQUEST,
             description: Message.UNVALIDATED,
-        })
-    );
-};
-
-/**
- * @function {AppApiFileCrudSpecDecorator}
- * @param {string} field
- * @param {string} destination
- * @returns {MethodDecorator}
- */
-export function AppApiFileCrudSpecDecorator (
-    field: string = "file",
-    destination: string
-): MethodDecorator
-{
-    return applyDecorators (
-        UseInterceptors (FileInterceptor (field, {
-            storage: diskStorage ({
-                destination,
-                filename: (
-                    request: Request, file: Express.Multer.File,
-                    callback: (
-                        error: Error | null,
-                        filename: string
-                    ) => void): void =>
-                {
-                    callback (null, `${Date.now ()}${extname (file.originalname)}`);
-                },
-            }),
-        })),
-        ApiConsumes ("multipart/form-data"),
-        ApiBody ({
-            required: true,
-            schema: {
-                type: "object",
-                properties: {
-                    file: {
-                        type: "string",
-                        format: "binary",
-                    },
-                },
-            },
-            description: "The file",
         })
     );
 };

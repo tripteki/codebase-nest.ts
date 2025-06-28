@@ -1,4 +1,5 @@
 import { Module, } from "@nestjs/common";
+import { BullModule as QueueModule, } from "@nestjs/bull";
 import { AppHelperModule, } from "src/app/modules/app.helper.module";
 import { AppConfigModule, } from "src/app/modules/app.config.module";
 import { AppDatabaseModule, } from "src/app/modules/app.database.module";
@@ -17,6 +18,11 @@ import { UserSeederCommand, } from "src/v1/api/user/consoles/commands/user.seede
 @Module ({
 
     imports: [
+
+        QueueModule.registerQueueAsync ({
+
+            name: "user-admin-queue",
+        }),
 
         AppHelperModule,
         AppConfigModule,
