@@ -20,12 +20,21 @@ describe ("Status (e2e)", (): void =>
 
     it ("status (GET)", (): Test => request (app.getHttpServer ())
     .get ("/status")
+    .expect (200)
     .expect ((res): void =>
     {
-        expect ([ 200, 503, ]).toContain (res.status);
+        expect (res.body).toHaveProperty ("data");
+        expect (res.body.data).toHaveProperty ("status");
+        expect (res.body.data).toHaveProperty ("database");
+        expect (res.body.data).toHaveProperty ("cache");
     }));
 
     it ("version (GET)", (): Test => request (app.getHttpServer ())
     .get ("/version")
-    .expect (200));
+    .expect (200)
+    .expect ((res): void =>
+    {
+        expect (res.body).toHaveProperty ("data");
+        expect (typeof res.body.data.version).toBe ("string");
+    }));
 });

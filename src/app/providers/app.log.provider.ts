@@ -8,13 +8,12 @@ import { DateTimeHelper, } from "src/app/helpers/datetime.helper";
 
 /**
  * @class {AppLogProvider}
- * @implements {AppProviderContract}
  */
 export class AppLogProvider
 {
     /**
      * @param {(() => INestApplication | Promise<INestApplication>)} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async register (app: (() => INestApplication | Promise<INestApplication>)): Promise<void>
     {
@@ -23,7 +22,7 @@ export class AppLogProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async boot (app: INestApplication): Promise<void>
     {
@@ -32,9 +31,9 @@ export class AppLogProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
-    public static async bootLog (app): Promise<void>
+    public static async bootLog (app: INestApplication): Promise<void>
     {
         const
 

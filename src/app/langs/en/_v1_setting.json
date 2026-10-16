@@ -1,0 +1,6 @@
+{
+    "forbidden": "Only a superadmin can change system settings",
+    "key_required": "Setting key is required",
+    "file_invalid": "Setting file must be an image",
+    "key_duplicate": "Setting keys cannot be repeated"
+}

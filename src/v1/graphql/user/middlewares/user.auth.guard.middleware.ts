@@ -1,3 +1,4 @@
+import { I18nContext, } from "nestjs-i18n";
 import { GqlExecutionContext, } from "@nestjs/graphql";
 import { Reflector, } from "@nestjs/core";
 import { Injectable, Inject, ExecutionContext, CanActivate, UnauthorizedException, } from "@nestjs/common";
@@ -66,7 +67,7 @@ export class UserGraphqlAuthGuardMiddleware implements CanActivate
 
         } catch {
 
-            throw new UnauthorizedException ("Not Authorized");
+            throw new UnauthorizedException (I18nContext.current ()?.t ("_v1_user.auth.invalid_token") ?? "Not Authorized");
         }
 
         return true;

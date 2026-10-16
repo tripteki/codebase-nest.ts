@@ -6,13 +6,12 @@ import { ConfigService, } from "@nestjs/config";
 
 /**
  * @class {AppApiProvider}
- * @implements {AppProviderContract}
  */
 export class AppApiProvider
 {
     /**
      * @param {(() => INestApplication | Promise<INestApplication>)} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async register (app: (() => INestApplication | Promise<INestApplication>)): Promise<void>
     {
@@ -21,7 +20,7 @@ export class AppApiProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async boot (app: INestApplication): Promise<void>
     {
@@ -30,9 +29,9 @@ export class AppApiProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
-    public static async bootSwagger (app): Promise<void>
+    public static async bootSwagger (app: INestApplication): Promise<void>
     {
         const configService: ConfigService = app.get (
             ConfigService

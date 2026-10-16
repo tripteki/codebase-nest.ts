@@ -42,10 +42,31 @@ export class DatabasePrismaPostgreDriver extends DatabasePrismaPostgreClient imp
 export class DatabasePrismaMongoDriver extends DatabasePrismaMongoClient implements OnModuleInit, OnModuleDestroy
 {
     /**
+     * @type {boolean}
+     */
+    protected readonly mongoEnabled: boolean;
+
+    /**
+     * @returns {void}
+     */
+    constructor ()
+    {
+        const mongoUri = String (process.env.DATABASE_MONGO_URI || "").trim ();
+
+        super ({
+            datasourceUrl: mongoUri || "mongodb://127.0.0.1:27017/off",
+        });
+
+        this.mongoEnabled = mongoUri.length > 0;
+    }
+
+    /**
      * @returns {Promise<void>}
      */
     public async onModuleInit (): Promise<void>
     {
+        if (! this.mongoEnabled) return;
+
         await this.$connect ();
     }
 
@@ -54,6 +75,8 @@ export class DatabasePrismaMongoDriver extends DatabasePrismaMongoClient impleme
      */
     public async onModuleDestroy (): Promise<void>
     {
+        if (! this.mongoEnabled) return;
+
         await this.$disconnect ();
     }
 };

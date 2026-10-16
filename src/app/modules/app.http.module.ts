@@ -1,15 +1,17 @@
 "use strict";
 
 import { Module, } from "@nestjs/common";
+import { APP_INTERCEPTOR, } from "@nestjs/core";
+import { AppStringResponseInterceptor, } from "src/app/interceptors/app.string.response.interceptor";
 import { ConfigModule, } from "@nestjs/config";
 import { ThrottlerModule, ThrottlerModuleOptions, ThrottlerOptions, } from "@nestjs/throttler";
 import { ServeStaticModule, ServeStaticModuleOptions, } from "@nestjs/serve-static";
-import { GraphQLModule, } from "@nestjs/graphql";
+// import { GraphQLModule, } from "@nestjs/graphql";
 import { TerminusModule, } from "@nestjs/terminus";
 import { ConfigService, } from "@nestjs/config";
-import { ApolloDriver, ApolloDriverConfig, } from "@nestjs/apollo";
+// import { ApolloDriver, ApolloDriverConfig, } from "@nestjs/apollo";
 import { AppController, } from "src/app/controllers/app.controller";
-import { AppResolver, } from "src/app/resolvers/app.resolver";
+// import { AppResolver, } from "src/app/resolvers/app.resolver";
 import { join, } from "path";
 
 @Module ({
@@ -42,25 +44,25 @@ import { join, } from "path";
             ]),
         }),
 
-        GraphQLModule.forRootAsync<ApolloDriverConfig> ({
-
-            imports: [ ConfigModule, ],
-            inject: [ ConfigService, ],
-
-            driver: ApolloDriver,
-
-            useFactory: async (configService: ConfigService): Promise<ApolloDriverConfig> => ({
-
-                path: configService.get<string> ("app.prefixGraphqlUrl"),
-                playground: configService.get<string> ("app.env") !== "production" ? {
-                    subscriptionEndpoint: configService.get<string> ("app.prefixGraphqlUrl"),
-                    endpoint: configService.get<string> ("playground.path"),
-                } : false,
-                autoSchemaFile: join (__dirname, "../", "resolvers/app.schema.graphql"),
-                sortSchema: true,
-                installSubscriptionHandlers: true,
-            }),
-        }),
+        // GraphQLModule.forRootAsync<ApolloDriverConfig> ({
+        //
+        //     imports: [ ConfigModule, ],
+        //     inject: [ ConfigService, ],
+        //
+        //     driver: ApolloDriver,
+        //
+        //     useFactory: async (configService: ConfigService): Promise<ApolloDriverConfig> => ({
+        //
+        //         path: configService.get<string> ("app.prefixGraphqlUrl"),
+        //         playground: configService.get<string> ("app.env") !== "production" ? {
+        //             subscriptionEndpoint: configService.get<string> ("app.prefixGraphqlUrl"),
+        //             endpoint: configService.get<string> ("playground.path"),
+        //         } : false,
+        //         autoSchemaFile: join (__dirname, "../", "resolvers/app.schema.graphql"),
+        //         sortSchema: true,
+        //         installSubscriptionHandlers: true,
+        //     }),
+        // }),
 
         ThrottlerModule.forRootAsync ({
 
@@ -81,7 +83,11 @@ import { join, } from "path";
 
     providers: [
 
-        AppResolver,
+        // AppResolver,
+        {
+            provide: APP_INTERCEPTOR,
+            useClass: AppStringResponseInterceptor,
+        },
     ],
 
     controllers: [

@@ -2,6 +2,7 @@
 
 import { applyDecorators, createParamDecorator, ExecutionContext, ParseArrayPipe, } from "@nestjs/common";
 import { ApiQuery, } from "@nestjs/swagger";
+import { parseUnifiedOrders, } from "src/app/helpers/query.parser.helper";
 import { Orderization, } from "src/app/repositories/app.repository";
 
 /**
@@ -19,7 +20,7 @@ export function AppApiOrderQueryStringDecorator (
             required: false,
             type: String,
             description: `The ${field} parameters for ordering the results`,
-            example: '{"field":"id","direction":"asc"}|{"field":"id","direction":"desc"}',
+            example: "created_at:desc,name:asc",
         })
     );
 };
@@ -39,7 +40,17 @@ export function AppOrderQueryStringDecorator<T> (
         data: any,
         ctx: ExecutionContext
     ) => {
-        const orders: Orderization<T>[] = ctx.switchToHttp ().getRequest ().query[field] || [];
-        return new ParseArrayPipe ({ items: Orderization<T>, separator, }).transform (orders, { type: "query", });
+        const orders = ctx.switchToHttp ().getRequest ().query[field];
+        const unified = parseUnifiedOrders (orders);
+
+        if (unified) {
+            return unified;
+        }
+
+        if (! String (orders ?? "").includes ("{")) {
+            return [];
+        }
+
+        return new ParseArrayPipe ({ items: Orderization<T>, separator, }).transform (orders || [], { type: "query", });
     }) ();
 };

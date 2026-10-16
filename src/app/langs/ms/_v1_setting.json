@@ -1,0 +1,6 @@
+{
+    "forbidden": "Anda tidak mempunyai kebenaran untuk mengurus tetapan sistem",
+    "key_required": "Sila isi nama tetapan.",
+    "file_invalid": "Fail tetapan mesti imej",
+    "key_duplicate": "Nama tetapan tidak boleh berulang"
+}

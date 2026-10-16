@@ -5,13 +5,12 @@ import { ConfigService, } from "@nestjs/config";
 
 /**
  * @class {AppGraphqlProvider}
- * @implements {AppProviderContract}
  */
 export class AppGraphqlProvider
 {
     /**
      * @param {(() => INestApplication | Promise<INestApplication>)} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async register (app: (() => INestApplication | Promise<INestApplication>)): Promise<void>
     {
@@ -20,7 +19,7 @@ export class AppGraphqlProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async boot (app: INestApplication): Promise<void>
     {
@@ -29,9 +28,9 @@ export class AppGraphqlProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
-    public static async bootPlayground (app): Promise<void>
+    public static async bootPlayground (app: INestApplication): Promise<void>
     {
         const configService: ConfigService = app.get (
             ConfigService

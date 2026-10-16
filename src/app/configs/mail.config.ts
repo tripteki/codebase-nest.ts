@@ -26,7 +26,7 @@ export default registerAs ("mail", () => ({
      * details for the email service provider (e.g., SMTP, Mailgun, Postmark).
      * The transport URI is taken from the `MAIL_URI` environment variable.
      */
-    transport: String (process.env.MAIL_URI),
+    transport: process.env.MAIL_URI ? String (process.env.MAIL_URI) : "",
 
     /**
      * -----------------------------------------------------

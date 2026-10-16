@@ -1,0 +1,25 @@
+{
+    "export": {
+        "started": { "message": "Eksport dimulakan" },
+        "completed": { "message": "Eksport selesai. Fail sedia untuk dimuat turun." },
+        "failed": { "message": "Eksport gagal. Sila cuba lagi nanti." }
+    },
+    "import": {
+        "started": { "message": "Import dimulakan" },
+        "completed": { "message": "Import selesai. {totalImported} diimport, {totalSkipped} dilangkau." },
+        "failed": { "message": "Import gagal. Semak format fail dan cuba lagi." }
+    },
+    "role": {
+        "not_found": "Peranan tidak dijumpai",
+        "name_exists": "Nama peranan ini sudah digunakan",
+        "permissions_not_found": "Satu atau lebih kebenaran tidak dijumpai",
+        "system_role_name_reserved": "Nama peranan ini sudah dikhaskan",
+        "system_role_locked": "Peranan bawaan tidak boleh ditukar nama atau dipadam",
+        "in_use": "Peranan ini masih digunakan oleh {count} pengguna. Tukar peranan mereka dahulu."
+    },
+    "permission": {
+        "not_found": "Kebenaran tidak dijumpai",
+        "name_exists": "Nama kebenaran ini sudah digunakan",
+        "system_permission_locked": "Kebenaran bawaan tidak boleh ditukar nama atau dipadam"
+    }
+}

@@ -28,6 +28,9 @@ export class UserAuthRegisteredMailListener extends AppMailNotificationListener
                 line1: this.i18nService.t ("_v1_user.account_registered.line1"),
                 line2: this.i18nService.t ("_v1_user.account_registered.line2"),
                 verify: this.i18nService.t ("_v1_user.account_registered.verify"),
+                title: this.i18nService.t ("_v1_user.account_registered.subject"),
+                user_name: event.name,
+                user_email: event.email,
                 link: this.urlHelper.ref ().sign (`${this.configService.get<string> ("app.frontendUrl")}/auth/verify-email/${event.email}`),
             },
         });

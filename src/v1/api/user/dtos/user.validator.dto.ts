@@ -1,20 +1,24 @@
-import { IsDefined, IsOptional, IsNotEmpty, MinLength, MaxLength, IsIn, IsString, IsEmail, IsBoolean, } from "class-validator";
+import { IsDefined, IsOptional, IsNotEmpty, MinLength, MaxLength, IsIn, IsString, IsEmail, IsBoolean, IsEnum, ValidateIf, } from "class-validator";
 import { ApiProperty, } from "@nestjs/swagger";
+import { UserRoleEnum, } from "src/v1/api/user/dtos/user.role.enum";
 
 /**
  * @class {UserAuthDto}
  */
 export class UserAuthDto
 {
-    @IsDefined ()
+    @IsOptional ()
     @IsIn ([ "email", "name", ])
     /**
-     * @type {string}
+     * Without a key, a value with `@` is treated as an email.
+     *
+     * @type {string | undefined}
      */
-    identifierKey: string;
+    identifierKey?: string;
 
     @IsDefined ()
     @IsString ()
+    @IsNotEmpty ()
     /**
      * @type {string}
      */
@@ -22,6 +26,7 @@ export class UserAuthDto
 
     @IsDefined ()
     @IsString ()
+    @MinLength (8)
     /**
      * @type {string}
      */
@@ -70,8 +75,8 @@ export class UserUpdateValidatorDto
     @IsOptional ()
     @IsNotEmpty ()
     @IsString ()
-    @MinLength (2)
-    @MaxLength (16)
+    @MinLength (1)
+    @MaxLength (255)
     /**
      * @type {string}
      */
@@ -80,9 +85,8 @@ export class UserUpdateValidatorDto
     @IsOptional ()
     @IsNotEmpty ()
     @IsString ()
-    @MinLength (8)
-    @MaxLength (48)
     @IsEmail ()
+    @MaxLength (255)
     /**
      * @type {string}
      */
@@ -91,16 +95,33 @@ export class UserUpdateValidatorDto
     @IsOptional ()
     @IsString ()
     @MinLength (8)
-    @MaxLength (16)
     /**
      * @type {string}
      */
     password: string;
 
+    @IsOptional ()
+    @IsString ()
+    @MinLength (8)
     /**
      * @type {string}
      */
     password_confirmation: string;
+
+    @IsOptional ()
+    @IsEnum (UserRoleEnum)
+    /**
+     * @type {UserRoleEnum}
+     */
+    role?: UserRoleEnum;
+
+    @IsOptional ()
+    @IsString ()
+    @MaxLength (255)
+    /**
+     * @type {string}
+     */
+    full_name?: string;
 }
 
 /**
@@ -113,20 +134,29 @@ export class UserCreateValidatorDto
      */
     id: string;
 
+    @ValidateIf ((dto: UserCreateValidatorDto) => ! dto.full_name)
     @IsDefined ()
     @IsString ()
-    @MinLength (2)
-    @MaxLength (16)
+    @MinLength (1)
+    @MaxLength (255)
     /**
      * @type {string}
      */
     name: string;
 
+    @IsOptional ()
+    @IsString ()
+    @MinLength (1)
+    @MaxLength (255)
+    /**
+     * @type {string}
+     */
+    full_name?: string;
+
     @IsDefined ()
     @IsString ()
     @IsEmail ()
-    @MinLength (8)
-    @MaxLength (48)
+    @MaxLength (255)
     /**
      * @type {string}
      */
@@ -135,16 +165,25 @@ export class UserCreateValidatorDto
     @IsDefined ()
     @IsString ()
     @MinLength (8)
-    @MaxLength (16)
     /**
      * @type {string}
      */
     password: string;
 
+    @IsDefined ()
+    @IsString ()
+    @MinLength (8)
     /**
      * @type {string}
      */
     password_confirmation: string;
+
+    @IsOptional ()
+    @IsEnum (UserRoleEnum)
+    /**
+     * @type {UserRoleEnum}
+     */
+    role?: UserRoleEnum;
 
     /**
      * @type {Date}
@@ -180,12 +219,14 @@ export class UserResetterUpdateValidatorDto
     @IsDefined ()
     @IsString ()
     @MinLength (8)
-    @MaxLength (16)
     /**
      * @type {string}
      */
     password: string;
 
+    @IsDefined ()
+    @IsString ()
+    @MinLength (8)
     /**
      * @type {string}
      */
@@ -198,11 +239,11 @@ export class UserResetterUpdateValidatorDto
 export class UserExportTypeDto
 {
     @IsOptional ()
-    @IsIn ([ "csv", "xls", "xlsx", ])
+    @IsString ()
     /**
      * @type {string}
      */
-    type?: string;
+    export_type?: string;
 }
 
 /**
@@ -259,6 +300,8 @@ export class UserMeUpdateValidatorDto
     @ApiProperty ({ type: String, nullable: true, required: false, example: null, })
     @IsOptional ()
     @IsString ()
+    @MinLength (8)
+    @MaxLength (16)
     /**
      * @type {string | null}
      */

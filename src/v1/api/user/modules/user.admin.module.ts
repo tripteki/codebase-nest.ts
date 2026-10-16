@@ -4,6 +4,8 @@ import { AppHelperModule, } from "src/app/modules/app.helper.module";
 import { AppConfigModule, } from "src/app/modules/app.config.module";
 import { AppDatabaseModule, } from "src/app/modules/app.database.module";
 import { NotificationUserModule, } from "src/v1/api/notification/modules/notification.user.module";
+import { ActivityAdminModule, } from "src/v1/api/log/modules/activity.admin.module";
+import { SettingAdminModule, } from "src/v1/api/setting/modules/setting.admin.module";
 import { UserAuthModule, } from "src/v1/api/user/modules/user.auth.module";
 import { UserProfileModule, } from "src/v1/api/user/modules/user.profile.module";
 import { UserSeeder, } from "src/v1/api/user/databases/seeders/user.seeder";
@@ -11,6 +13,8 @@ import { UserFactory, } from "src/v1/api/user/databases/factories/user.factory";
 import { UserAdminActivatedBroadcastListener, } from "src/v1/api/user/listeners/user.admin.activated.broadcast.listener";
 import { UserAdminDeactivatedBroadcastListener, } from "src/v1/api/user/listeners/user.admin.deactivated.broadcast.listener";
 import { UserAdminActivatedMailListener, } from "src/v1/api/user/listeners/user.admin.activated.mail.listener";
+import { UserAdminCreatedMailListener, } from "src/v1/api/user/listeners/user.admin.created.mail.listener";
+import { UserRegistrationVerifiedListener, } from "src/v1/api/user/listeners/user.registration.verified.listener";
 import { UserAdminDeactivatedMailListener, } from "src/v1/api/user/listeners/user.admin.deactivated.mail.listener";
 import { UserAdminExportedDatabaseListener, } from "src/v1/api/user/listeners/user.admin.exported.database.listener";
 import { UserAdminExportedBroadcastListener, } from "src/v1/api/user/listeners/user.admin.exported.broadcast.listener";
@@ -18,6 +22,7 @@ import { UserAdminImportedDatabaseListener, } from "src/v1/api/user/listeners/us
 import { UserAdminImportedBroadcastListener, } from "src/v1/api/user/listeners/user.admin.imported.broadcast.listener";
 import { UserAdminRepository, } from "src/v1/api/user/repositories/user.admin.repository";
 import { UserAdminService, } from "src/v1/api/user/services/user.admin.service";
+import { AccountNotifier, } from "src/v1/api/user/support/account.notifier";
 import { UserAdminController, } from "src/v1/api/user/controllers/user.admin.controller";
 import { UserAdminExportProcessor, } from "src/v1/api/user/processors/user.admin.export.processor";
 import { UserAdminImportProcessor, } from "src/v1/api/user/processors/user.admin.import.processor";
@@ -36,13 +41,15 @@ import { UserSeederCommand, } from "src/v1/api/user/consoles/commands/user.seede
         AppConfigModule,
         AppDatabaseModule,
         NotificationUserModule,
+        ActivityAdminModule,
+        SettingAdminModule,
         UserAuthModule,
         UserProfileModule,
     ],
 
     exports: [
 
-        //
+        UserAdminService,
     ],
 
     providers: [
@@ -52,7 +59,10 @@ import { UserSeederCommand, } from "src/v1/api/user/consoles/commands/user.seede
         UserAdminActivatedBroadcastListener,
         UserAdminDeactivatedBroadcastListener,
         UserAdminActivatedMailListener,
+        UserAdminCreatedMailListener,
+        UserRegistrationVerifiedListener,
         UserAdminDeactivatedMailListener,
+        AccountNotifier,
         UserAdminExportedDatabaseListener,
         UserAdminExportedBroadcastListener,
         UserAdminImportedDatabaseListener,

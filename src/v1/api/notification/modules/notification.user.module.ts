@@ -4,6 +4,7 @@ import { AppHelperModule, } from "src/app/modules/app.helper.module";
 import { AppConfigModule, } from "src/app/modules/app.config.module";
 import { AppDatabaseModule, } from "src/app/modules/app.database.module";
 import { UserAuthModule, } from "src/v1/api/user/modules/user.auth.module";
+import { UserProfileModule, } from "src/v1/api/user/modules/user.profile.module";
 import { UserWebpushModule, } from "src/v1/api/user/modules/user.webpush.module";
 import { NotificationUserRepository, } from "src/v1/api/notification/repositories/notification.user.repository";
 import { NotificationUserService, } from "src/v1/api/notification/services/notification.user.service";
@@ -26,6 +27,7 @@ import { NotificationWebpushProcessor, } from "src/v1/api/notification/processor
         AppConfigModule,
         AppDatabaseModule,
         UserAuthModule,
+        UserProfileModule,
         UserWebpushModule,
     ],
 

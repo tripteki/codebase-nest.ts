@@ -141,3 +141,39 @@ model Notification {
 
     user                User        @relation (fields: [user_id], references: [id])
 }
+
+model Activity {
+
+    @@map ("activity_log")
+    @@index ([log_name], map: "ix_activity_log_log_name")
+    @@index ([subject_type, subject_id], map: "ix_activity_log_subject")
+    @@index ([causer_type, causer_id], map: "ix_activity_log_causer")
+    @@index ([created_at], map: "ix_activity_log_created_at")
+
+    id                  String      @id
+    log_name            String?
+    description         String
+    subject_type        String?
+    event               String?
+    subject_id          String?
+    causer_type         String?
+    causer_id           String?
+    properties          Json?
+    batch_uuid          String?
+    created_at          DateTime
+    updated_at          DateTime
+}
+
+model Setting {
+
+    @@map ("settings")
+    @@index ([key], map: "ix_settings_key")
+
+    id                  String      @id
+    key                 String      @unique
+    value               String?
+    value_kind          String      @default ("text")
+    created_at          DateTime
+    updated_at          DateTime
+    deleted_at          DateTime?
+}

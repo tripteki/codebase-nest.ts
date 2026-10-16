@@ -5,6 +5,8 @@ import Test from "supertest/lib/test";
 import { setupTestApp, setupAuthTestApp, setdownTestApp, } from "test/test.case";
 import { DatabasePrismaPostgreDriver, } from "src/app/drivers/database.driver";
 import { DateTimeHelper, } from "src/app/helpers/datetime.helper";
+import { HasherHelper, } from "src/app/helpers/hasher.helper";
+import { ulid, } from "ulid";
 
 describe ("User (e2e)", (): void =>
 {
@@ -257,6 +259,29 @@ describe ("User (e2e)", (): void =>
 
     describe ("User Admin", (): void =>
     {
+        let targetUserId: string;
+
+        beforeAll (async (): Promise<void> =>
+        {
+            const prismaPostgreService: DatabasePrismaPostgreDriver = app.get (DatabasePrismaPostgreDriver);
+            const dateTimeHelper: DateTimeHelper = app.get (DateTimeHelper);
+            const hasherHelper: HasherHelper = app.get (HasherHelper);
+
+            targetUserId = ulid ();
+
+            await prismaPostgreService.user.create ({
+                data: {
+                    id: targetUserId,
+                    name: `target-${targetUserId}`,
+                    email: `target-${targetUserId.toLowerCase ()}@mail.com`,
+                    password: await hasherHelper.hash ("12345678"),
+                    email_verified_at: dateTimeHelper.now (),
+                    created_at: dateTimeHelper.now (),
+                    updated_at: dateTimeHelper.now (),
+                },
+            });
+        });
+
         beforeEach (async (): Promise<void> =>
         {
             const prismaPostgreService: DatabasePrismaPostgreDriver = app.get (DatabasePrismaPostgreDriver);
@@ -295,7 +320,7 @@ describe ("User (e2e)", (): void =>
         it ("admin users update (PUT)", async (): Promise<void> =>
         {
             await request (app.getHttpServer ())
-            .put (`/v1/admin/users/${userId}`)
+            .put (`/v1/admin/users/${targetUserId}`)
             .set ("Authorization", `Bearer ${token}`)
             .send ({
                 name: `updated-user-${Date.now ()}`,
@@ -327,7 +352,7 @@ describe ("User (e2e)", (): void =>
             });
 
             await request (app.getHttpServer ())
-            .put (`/v1/admin/users/verify/${userId}`)
+            .put (`/v1/admin/users/verify/${targetUserId}`)
             .set ("Authorization", `Bearer ${token}`)
             .expect (200);
         });
@@ -346,7 +371,7 @@ describe ("User (e2e)", (): void =>
             });
 
             await request (app.getHttpServer ())
-            .delete (`/v1/admin/users/deactivate/${userId}`)
+            .delete (`/v1/admin/users/deactivate/${targetUserId}`)
             .set ("Authorization", `Bearer ${token}`)
             .expect (200);
 
@@ -372,7 +397,7 @@ describe ("User (e2e)", (): void =>
             });
 
             await request (app.getHttpServer ())
-            .delete (`/v1/admin/users/activate/${userId}`)
+            .delete (`/v1/admin/users/activate/${targetUserId}`)
             .set ("Authorization", `Bearer ${token}`)
             .expect (200);
         });

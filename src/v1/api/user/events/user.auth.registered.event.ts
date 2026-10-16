@@ -51,4 +51,9 @@ export class UserAuthRegisteredEvent
      * @type {Date | null}
      */
     deleted_at?: Date | null;
+
+    /**
+     * @type {string | null}
+     */
+    token?: string | null;
 }

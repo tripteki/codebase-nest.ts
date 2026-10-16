@@ -1,0 +1,22 @@
+{
+    "processor": {
+        "import": {
+            "missing_file": "Kandungan atau nama fail tiada",
+            "unsupported_format": "Format fail tidak disokong: {format}",
+            "empty_file": "Fail kosong atau tiada data",
+            "no_data": "Tiada data untuk disemak",
+            "missing_columns": "Lajur yang diperlukan tiada: {columns}"
+        },
+        "export": {
+            "no_data": "Tiada data untuk dieksport",
+            "unsupported_type": "Jenis eksport tidak disokong: {type}",
+            "save_failed": "Gagal menyimpan fail eksport: {path}"
+        }
+    },
+    "upload": {
+        "too_large": "Saiz fail mestilah {size} MB atau kurang.",
+        "image_type": "Sila pilih imej JPG, PNG, GIF atau WebP.",
+        "icon_type": "Sila pilih imej JPG, PNG, GIF, WebP atau ICO.",
+        "import_type": "Sila pilih fail CSV, TXT, XLS atau XLSX."
+    }
+}

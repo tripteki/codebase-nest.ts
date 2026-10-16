@@ -1,13 +1,9 @@
-<header>
-    <h2>{{ start_greeting }}</h2>
-</header>
-
-<main>
-<p>{{ line }}</p>
-<p>{{ thank_you }}</p>
-</main>
-
-<footer>
-    <hr />
-    <h2 style="text-transform: capitalize;">{{ close_greeting }}</h2>
-</footer>
+{{> mail.open}}
+{{#if title}}
+<p style="margin:0 0 6px;font-size:20px;font-weight:700;line-height:1.25;letter-spacing:-0.02em;color:#f9fafb;">{{ title }}</p>
+{{/if}}
+<p style="margin:0 0 12px;font-size:15px;font-weight:700;line-height:1.55;color:#f3f4f6;">{{ start_greeting }}</p>
+<p style="margin:0 0 12px;color:#d1d5db;font-size:14px;line-height:1.55;">{{ line }}</p>
+{{> user.panel}}
+{{> mail.sign thanks=thank_you}}
+{{> mail.close}}

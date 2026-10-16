@@ -26,6 +26,9 @@ export class UserAdminDeactivatedMailListener extends AppMailNotificationListene
                 start_greeting: this.i18nService.t ("_v1_user.common.start_greeting", { args: { name: event.name, }, }),
                 line: this.i18nService.t ("_v1_user.account_deactivated.line"),
                 thank_you: this.i18nService.t ("_v1_user.account_deactivated.thank_you"),
+                title: this.i18nService.t ("_v1_user.account_deactivated.subject"),
+                user_name: event.name,
+                user_email: event.email,
             },
         });
     }

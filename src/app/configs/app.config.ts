@@ -3,6 +3,71 @@
 import { registerAs, } from "@nestjs/config";
 import * as project from "../../../package.json";
 
+/**
+ * @returns {string}
+ */
+function appEmailServer (): string
+{
+    const override = String (process.env.APP_EMAIL_SERVER || "").trim ();
+
+    if (override)
+    {
+        return override;
+    }
+
+    const rawUrl = String (process.env.APP_URL || "").trim ();
+
+    if (! rawUrl)
+    {
+        return "";
+    }
+
+    const url = /^https?:\/\//.test (rawUrl) ? rawUrl : `http://${rawUrl}`;
+
+    try
+    {
+        return new URL (url).hostname || "";
+    }
+    catch
+    {
+        return "";
+    }
+}
+
+/**
+ * @returns {string | string[]}
+ */
+const corsOrigin = (): string | string[] => {
+    const raw = String (process.env.CORS_ORIGIN || "").trim ();
+    const fallback = String (process.env.FRONTEND_URL || "http://localhost:3000");
+
+    if (! raw) {
+        return fallback;
+    }
+
+    if (raw.startsWith ("[")) {
+        try {
+            const parsed = JSON.parse (raw);
+
+            if (Array.isArray (parsed) && parsed.length > 0) {
+                return parsed.map ((item) => String (item));
+            }
+        } catch {
+            return fallback;
+        }
+    }
+
+    if (raw.includes (",")) {
+        const origins = raw.split (",").map ((item) => item.trim ()).filter (Boolean);
+
+        if (origins.length > 0) {
+            return origins;
+        }
+    }
+
+    return raw;
+};
+
 export default registerAs ("app", () => ({
 
     /**
@@ -88,6 +153,17 @@ export default registerAs ("app", () => ({
 
     /**
      * -----------------------------------------------------
+     * Email Server of Application
+     * -----------------------------------------------------
+     *
+     * Domain used to build seeded account addresses, for example
+     * `superuser@{emailServer}`. Set with `process.env.APP_EMAIL_SERVER`.
+     * When that value is empty, the host of `process.env.APP_URL` is used.
+     */
+    emailServer: appEmailServer (),
+
+    /**
+     * -----------------------------------------------------
      * Cross-Origin Resource Sharing (CORS)
      * -----------------------------------------------------
      *
@@ -102,7 +178,7 @@ export default registerAs ("app", () => ({
      */
     cors: {
 
-        origin: String (process.env.FRONTEND_URL || "http://localhost:3000"),
+        origin: corsOrigin (),
 
         methods: [
 

@@ -51,7 +51,7 @@ export class UserAuthRepository extends AppPostgreRepository
             const user: User | null = await this.prismaPostgreService.user.findFirstOrThrow ({
                 where: {
                     ... this.softDelete (),
-                    [data.identifierKey]: data.identifierValue,
+                    [data.identifierKey || (String (data.identifierValue).includes ("@") ? "email" : "name")]: data.identifierValue,
                 },
             });
 
@@ -89,6 +89,24 @@ export class UserAuthRepository extends AppPostgreRepository
      * @param {string} userId
      * @returns {Promise<User | null>}
      */
+    /**
+     * @param {string} userId
+     * @returns {Promise<User | null>}
+     */
+    public async findOneById (userId: string): Promise<User | null>
+    {
+        return await this.prismaPostgreService.user.findFirst ({
+            where: {
+                id: userId,
+                deleted_at: null,
+            },
+        });
+    }
+
+    /**
+     * @param {string} userId
+     * @returns {Promise<User | null>}
+     */
     public async me (
         userId: string
     ): Promise<User | null>
@@ -104,6 +122,24 @@ export class UserAuthRepository extends AppPostgreRepository
     }
 
     /**
+     * @param {string} userId
+     * @param {string} fallback
+     * @returns {Promise<string>}
+     */
+    public async displayName (
+        userId: string,
+        fallback: string
+    ): Promise<string>
+    {
+        const profile = await this.prismaPostgreService.profile.findUnique ({
+            where: { user_id: userId, },
+            select: { full_name: true, },
+        });
+
+        return (profile?.full_name || "").trim () || fallback;
+    }
+
+    /**
      * @param {DatabasePrismaPostgreConstraint.UserCreateInput} data
      * @returns {Promise<User | null>}
      */
@@ -112,16 +148,31 @@ export class UserAuthRepository extends AppPostgreRepository
     ): Promise<User | null>
     {
         return this.mutate<User> (async (transaction: DatabasePrismaPostgreConstraint.TransactionClient): Promise<User | null> => {
-            return await transaction.user.create ({
+            const now = this.dateTimeHelper.now ();
+            const fullName = String ((data as { full_name?: string, }).full_name || data.name || "").trim ();
+            const created = await transaction.user.create ({
                 data: {
                     id: ulid (),
-                    name: data.name,
+                    name: data.name || fullName,
                     email: data.email,
                     password: await this.hasherHelper.hash (data.password as string),
-                    created_at: this.dateTimeHelper.now (),
-                    updated_at: this.dateTimeHelper.now (),
+                    created_at: now,
+                    updated_at: now,
                 },
             });
+
+            await transaction.profile.create ({
+                data: {
+                    id: ulid (),
+                    user_id: created.id,
+                    full_name: fullName || created.email,
+                    interests: [],
+                    created_at: now,
+                    updated_at: now,
+                },
+            });
+
+            return created;
         });
     }
 
@@ -145,6 +196,76 @@ export class UserAuthRepository extends AppPostgreRepository
                     updated_at: this.dateTimeHelper.now (),
                 },
             });
+        });
+    }
+
+    /**
+     * @param {string} email
+     * @returns {Promise<User | null>}
+     */
+    /**
+     * @param {string} userId
+     * @param {string} email
+     * @returns {Promise<User>}
+     */
+    public async changeEmail (userId: string, email: string): Promise<User>
+    {
+        return await this.prismaPostgreService.user.update ({
+            where: { id: userId, },
+            data: {
+                email,
+                updated_at: this.dateTimeHelper.now (),
+            },
+        });
+    }
+
+    /**
+     * @param {string} email
+     * @param {string} exceptId
+     * @returns {Promise<boolean>}
+     */
+    public async emailTaken (email: string, exceptId?: string): Promise<boolean>
+    {
+        const found = await this.prismaPostgreService.user.findFirst ({
+            where: {
+                email,
+                ...(exceptId ? { id: { not: exceptId, }, } : {}),
+            },
+            select: { id: true, },
+        });
+
+        return found != null;
+    }
+
+    /**
+     * @param {string} name
+     * @param {string} exceptId
+     * @returns {Promise<boolean>}
+     */
+    public async nameTaken (name: string, exceptId?: string): Promise<boolean>
+    {
+        const found = await this.prismaPostgreService.user.findFirst ({
+            where: {
+                name,
+                ...(exceptId ? { id: { not: exceptId, }, } : {}),
+            },
+            select: { id: true, },
+        });
+
+        return found != null;
+    }
+
+    /**
+     * @param {string} email
+     * @returns {Promise<User | null>}
+     */
+    public async findOneByEmail (email: string): Promise<User | null>
+    {
+        return await this.prismaPostgreService.user.findFirst ({
+            where: {
+                email,
+                deleted_at: null,
+            },
         });
     }
 

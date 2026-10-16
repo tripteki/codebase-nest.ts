@@ -8,7 +8,7 @@ import { AppI18NProvider, } from "src/app/providers/app.i18n.provider";
 import { AppHttpProvider, } from "src/app/providers/app.http.provider";
 import { AppConsoleProvider, } from "src/app/providers/app.console.provider";
 import { AppApiProvider, } from "src/app/providers/app.api.provider";
-import { AppGraphqlProvider, } from "src/app/providers/app.graphql.provider";
+// import { AppGraphqlProvider, } from "src/app/providers/app.graphql.provider";
 import { AppReplProvider, } from "src/app/providers/app.repl.provider";
 import { AppViewProvider, } from "src/app/providers/app.view.provider";
 import { AppModule, } from "src/app/modules/app.module";
@@ -30,7 +30,7 @@ AppHttpProvider.register (async (): Promise<INestApplication> =>
     AppI18NProvider.boot (app);
     AppHttpProvider.boot (app);
     AppApiProvider.boot (app);
-    AppGraphqlProvider.boot (app);
+    // AppGraphqlProvider.boot (app);
     AppViewProvider.boot (app);
 
     //: End Define Service Providers //

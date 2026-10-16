@@ -3,6 +3,7 @@
 import { Request, Response, } from "express";
 import { Injectable, ExecutionContext, CanActivate, ForbiddenException, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
+import { I18nService, } from "nestjs-i18n";
 import { UrlHelper, } from "src/app/helpers/url.helper";
 
 @Injectable ()
@@ -15,11 +16,13 @@ export class AppUrlGuardMiddleware implements CanActivate
     /**
      * @param {ConfigService} configService
      * @param {UrlHelper} urlHelper
+     * @param {I18nService} i18nService
      * @returns {void}
      */
     constructor (
         protected readonly configService: ConfigService,
-        private readonly urlHelper: UrlHelper
+        private readonly urlHelper: UrlHelper,
+        private readonly i18nService: I18nService
     )
     {
         //
@@ -45,7 +48,11 @@ export class AppUrlGuardMiddleware implements CanActivate
 
         } catch {
 
-            throw new ForbiddenException ("Not Signed");
+            const key = cleanedUrl.includes ("/reset-password/")
+                ? "_v1_user.auth.invalid_or_expired_reset_token"
+                : "_v1_user.auth.invalid_or_expired_verify_link";
+
+            throw new ForbiddenException (this.i18nService.t (key));
         }
 
         return true;

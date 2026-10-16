@@ -2,7 +2,7 @@
 
 import { Prisma as DatabasePrismaPostgreConstraint, } from "@prisma/client";
 import { DatabasePrismaPostgreDriver, } from "src/app/drivers/database.driver";
-import { Logger as LoggerService, } from "@nestjs/common";
+import { Logger as LoggerService, NotFoundException, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
 import { I18nService, } from "nestjs-i18n";
 import {
@@ -43,6 +43,26 @@ export abstract class AppPostgreRepository implements AppRepository, AppPaginati
     }
 
     /**
+     * @param {string | undefined} modelName
+     * @returns {NotFoundException}
+     */
+    protected notFound (modelName?: string): NotFoundException
+    {
+        const keys: Record<string, string> = {
+            User: "_v1_user.auth.user_not_found",
+            Role: "_v1_acl.role.not_found",
+            Permission: "_v1_acl.permission.not_found",
+            Activity: "_v1_log.activity.not_found",
+            Notification: "_v1_notification.notification_not_found",
+        };
+        const key = keys[String (modelName || "")];
+
+        return new NotFoundException (key
+            ? this.i18nService.t (key)
+            : this.i18nService.t ("validation.exists", { args: { attribute: modelName, }, }));
+    }
+
+    /**
      * @returns {SoftDeletion}
      */
     protected softDelete (): SoftDeletion
@@ -54,7 +74,7 @@ export abstract class AppPostgreRepository implements AppRepository, AppPaginati
     }
 
     /**
-     * @params {Orderization<T>[]} orders
+     * @param {Orderization<T>[]} orders
      * @returns {{ orderBy: Record<string, "asc" | "desc">[]; }}
      */
     protected order<T> (
@@ -107,6 +127,7 @@ export abstract class AppPostgreRepository implements AppRepository, AppPaginati
 
             return {
 
+                total: lengthQuery,
                 totalPage: lastPage,
                 perPage,
                 currentPage,
@@ -128,6 +149,7 @@ export abstract class AppPostgreRepository implements AppRepository, AppPaginati
 
             return {
 
+                total: 0,
                 totalPage: 1,
                 perPage,
                 currentPage,
@@ -230,9 +252,7 @@ export abstract class AppPostgreRepository implements AppRepository, AppPaginati
                     );
                 } else {
                     if ((error as any).code === "P2025") {
-                        throw new Error (
-                            this.i18nService.t ("validation.exists", { args: { attribute: (error as any).meta.modelName, }, })
-                        );
+                        throw this.notFound ((error as any).meta?.modelName);
                     }
                 }
             }
@@ -266,9 +286,7 @@ export abstract class AppPostgreRepository implements AppRepository, AppPaginati
 
             if (error instanceof DatabasePrismaPostgreConstraint.PrismaClientKnownRequestError) {
                 if ((error as any).code === "P2025") {
-                    throw new Error (
-                        this.i18nService.t ("validation.exists", { args: { attribute: (error as any).meta.modelName, }, })
-                    );
+                    throw this.notFound ((error as any).meta?.modelName);
                 } else if ((error as any).code === "P2002") {
                     throw new Error (
                         this.i18nService.t ("validation.unique", { args: { attribute: (error as any).meta.target[0], }, })

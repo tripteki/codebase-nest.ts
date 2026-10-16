@@ -1,4 +1,4 @@
-import { Request, Response, } from "express";
+import { Request, } from "express";
 import { Controller, HttpCode, Body, Param, Query, Get, Post, Put, Patch, Delete, Req, Res, UseGuards, } from "@nestjs/common";
 import { ApiTags, ApiParam, ApiQuery, ApiBody, ApiResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, } from "@nestjs/swagger";
 import { AppApiStandardResponsesDecorator, } from "src/app/decorators/app.swagger.decorator";
@@ -15,6 +15,9 @@ import { UserHttpAuthGuardMiddleware, } from "src/v1/api/user/middlewares/user.a
 
 @ApiTags ("UserAuth")
 @Controller ()
+/**
+ * @class {UserAuthController}
+ */
 export class UserAuthController
 {
     /**
@@ -69,7 +72,9 @@ export class UserAuthController
 
     @Post ("/v1/auth/logout")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
     @ApiResponse ({
@@ -82,7 +87,6 @@ export class UserAuthController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<boolean>}
      */
     public async logout (
@@ -90,7 +94,7 @@ export class UserAuthController
     ): Promise<boolean>
     {
         return Boolean (
-            this.userAuthService.logout (
+            await this.userAuthService.logout (
                 { userId: request["user"].sub, },
                 this.userAuthService.httpBearerToken (request)
             )
@@ -114,7 +118,6 @@ export class UserAuthController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<UserAuthTransformerDto | string>}
      */
     public async refresh (
@@ -129,7 +132,9 @@ export class UserAuthController
 
     @Get ("/v1/auth/me")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 60, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
     @ApiOperation ({ summary: "Me", })
@@ -137,7 +142,6 @@ export class UserAuthController
     @AppApiStandardResponsesDecorator ({ unauthorized: true, forbidden: true, })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<UserMeTransformerDto | string>}
      */
     public async me (
@@ -149,6 +153,8 @@ export class UserAuthController
 
     @Post ("/v1/auth/register")
     @HttpCode (Status.CREATED)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 5, ttl: 60000, }, })
     @ApiBody ({
         required: true,
         description: "The input",
@@ -182,7 +188,9 @@ export class UserAuthController
 
     @Post ("/v1/auth/verify-email/:email")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (AppUrlGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @ApiQuery ({
         name: "signed",
         required: true,
@@ -204,17 +212,16 @@ export class UserAuthController
         description: Message.UNSIGNED,
     })
     /**
-     * @param {Request} request
-     * @param {Response} response
+     * @param {string} signed
      * @param {UserIdentifierEmailDto} parameters
      * @returns {Promise<UserTransformerDto | string>}
      */
     public async verify (
-        @Req () request: Request,
+        @Query ("signed") signed: string,
         @Param () parameters: UserIdentifierEmailDto
     ): Promise<UserTransformerDto | string>
     {
-        return await this.userAuthService.verify ({ userEmail: parameters.email, });
+        return await this.userAuthService.verify ({ userEmail: parameters.email, }, signed);
     }
 
     @Post ("/v1/auth/email/verification-notification")
@@ -234,7 +241,6 @@ export class UserAuthController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<string>}
      */
     public async reverify (
@@ -246,7 +252,9 @@ export class UserAuthController
 
     @Post ("/v1/auth/reset-password/:email")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (AppUrlGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @ApiQuery ({
         name: "signed",
         required: true,
@@ -276,8 +284,7 @@ export class UserAuthController
         description: Message.UNSIGNED,
     })
     /**
-     * @param {Request} request
-     * @param {Response} response
+     * @param {string} signed
      * @param {UserIdentifierEmailDto} parameters
      * @param {UserResetterUpdateValidatorDto} inputs
      * @returns {Promise<UserTransformerDto | string>}
@@ -289,6 +296,32 @@ export class UserAuthController
     ): Promise<UserTransformerDto | string>
     {
         return await this.userAuthService.reset ({ token: signed, email: parameters.email, password: inputs.password, password_confirmation: inputs.password_confirmation, });
+    }
+
+    @Post ("/v1/auth/resend-verification")
+    @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 3, ttl: 60000, }, })
+    @ApiBody ({
+        required: true,
+        description: "The input",
+        examples: { "application/json": { value: {
+            email: "user@mail.com",
+        }, }, },
+    })
+    @ApiResponse ({
+        status: Status.OK,
+        description: Message.OK,
+    })
+    /**
+     * @param {UserIdentifierEmailDto} inputs
+     * @returns {Promise<string>}
+     */
+    public async resendVerification (
+        @Body () inputs: UserIdentifierEmailDto
+    ): Promise<string>
+    {
+        return await this.userAuthService.reverifyByEmail (inputs.email);
     }
 
     @Post ("/v1/auth/forgot-password")

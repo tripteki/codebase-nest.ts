@@ -1,5 +1,6 @@
-import { Request, Response, } from "express";
+import { Request, } from "express";
 import { Controller, HttpCode, Body, Param, Get, Post, Put, Patch, Delete, Req, Res, UseGuards, } from "@nestjs/common";
+import { Throttle as ThrottleMiddleware, ThrottlerGuard as ThrottleGuardMiddleware, } from "@nestjs/throttler";
 import { ApiTags, ApiParam, ApiBody, ApiResponse, ApiBearerAuth, } from "@nestjs/swagger";
 import { Status, Message, BatchPayloadType, } from "src/app/dtos/app.dto";
 import { OffsetPaginationType, CursorPaginationType, OffsetPagination, CursorPagination, Orderization, Filterization, } from "src/app/repositories/app.repository";
@@ -14,9 +15,13 @@ import { NotificationIdentifierDto, } from "src/v1/api/notification/dtos/notific
 import { UserAuthAccessTokenMetadataMiddleware, UserAuthRefreshTokenMetadataMiddleware, } from "src/v1/api/user/dtos/user.auth.enum";
 import { UserHttpAuthGuardMiddleware, } from "src/v1/api/user/middlewares/user.auth.guard.middleware";
 import { UserHttpVerificationGuardMiddleware, } from "src/v1/api/user/middlewares/user.auth.verification.guard.middleware";
+import { UserHttpPermissionGuardMiddleware, UserPermissionMetadataMiddleware, } from "src/v1/api/user/middlewares/user.permission.guard.middleware";
 
 @ApiTags ("NotificationUser")
 @Controller ("/v1/notifications")
+/**
+ * @class {NotificationUserController}
+ */
 export class NotificationUserController
 {
     /**
@@ -34,6 +39,8 @@ export class NotificationUserController
 
     @Get ("/")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiOrderQueryStringDecorator ("orders")
@@ -52,12 +59,11 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {Orderization<NotificationTransformerDto>[]} orders
      * @param {Filterization<NotificationTransformerDto>[]} filters
      * @param {number} limitPage
      * @param {number} currentPage
-     * @returns {Promise<NotificationTransformerDto[]>}
+     * @returns {Promise<OffsetPagination<NotificationTransformerDto>>}
      */
     public async index (
         @Req () request: Request,
@@ -77,6 +83,8 @@ export class NotificationUserController
 
     @Get ("/count")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
@@ -94,7 +102,6 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<NotificationCountTransformerDto>}
      */
     public async count (
@@ -108,6 +115,8 @@ export class NotificationUserController
 
     @Put ("/read-all")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
@@ -129,7 +138,6 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<BatchPayloadType>}
      */
     public async readAll (
@@ -143,6 +151,8 @@ export class NotificationUserController
 
     @Put ("/read/:id")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
@@ -170,7 +180,6 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {NotificationIdentifierDto} parameters
      * @returns {Promise<NotificationTransformerDto | string>}
      */
@@ -187,6 +196,8 @@ export class NotificationUserController
 
     @Get ("/unread")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
@@ -204,7 +215,6 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {Promise<NotificationUnreadTransformerDto>}
      */
     public async unread (
@@ -218,6 +228,8 @@ export class NotificationUserController
 
     @Get ("/:id")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiShowCrudSpecDecorator ("id")
@@ -232,7 +244,6 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {NotificationIdentifierDto} parameters
      * @returns {Promise<NotificationTransformerDto | string>}
      */
@@ -247,9 +258,31 @@ export class NotificationUserController
         );
     }
 
+    @Delete ("/delete-all")
+    @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
+    @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("notification.delete")
+    @ApiBearerAuth ()
+    /**
+     * @param {Request} request
+     * @returns {Promise<BatchPayloadType>}
+     */
+    public async deleteAll (
+        @Req () request: Request
+    ): Promise<BatchPayloadType>
+    {
+        return await this.notificationUserService.deleteAll ({ userId: request["user"].sub, });
+    }
+
     @Delete ("/:id")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
+    @UserPermissionMetadataMiddleware ("notification.delete")
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiDestroyCrudSpecDecorator ("id")
     @ApiBearerAuth ()
@@ -263,9 +296,8 @@ export class NotificationUserController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {NotificationIdentifierDto} parameters
-     * @returns {Promise<UserTransformerDto | string>}
+     * @returns {Promise<NotificationTransformerDto | string>}
      */
     public async destroy (
         @Req () request: Request,

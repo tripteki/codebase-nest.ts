@@ -1,0 +1,22 @@
+{
+    "processor": {
+        "import": {
+            "missing_file": "Missing file content or filename",
+            "unsupported_format": "Unsupported file format: {format}",
+            "empty_file": "File is empty or has no data",
+            "no_data": "No data to validate",
+            "missing_columns": "Missing required columns: {columns}"
+        },
+        "export": {
+            "no_data": "No data to export",
+            "unsupported_type": "Unsupported export type: {type}",
+            "save_failed": "Failed to save export file: {path}"
+        }
+    },
+    "upload": {
+        "too_large": "The file must be {size} MB or smaller.",
+        "image_type": "Please choose a JPG, PNG, GIF, or WebP image.",
+        "icon_type": "Please choose a JPG, PNG, GIF, WebP, or ICO image.",
+        "import_type": "Please choose a CSV, TXT, XLS, or XLSX file."
+    }
+}

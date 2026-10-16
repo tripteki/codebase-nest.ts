@@ -1,3 +1,4 @@
+import { I18nContext, } from "nestjs-i18n";
 import { Request, Response, } from "express";
 import { Socket, } from "socket.io";
 import { Reflector, } from "@nestjs/core";
@@ -66,7 +67,7 @@ export class UserHttpAuthGuardMiddleware implements CanActivate
 
         } catch {
 
-            throw new UnauthorizedException ("Not Authorized");
+            throw new UnauthorizedException (I18nContext.current ()?.t ("_v1_user.auth.invalid_token") ?? "Not Authorized");
         }
 
         return true;
@@ -116,7 +117,7 @@ export class UserWsAuthGuardMiddleware implements CanActivate
 
         } catch {
 
-            throw new UnauthorizedException ("Not Authorized");
+            throw new UnauthorizedException (I18nContext.current ()?.t ("_v1_user.auth.invalid_token") ?? "Not Authorized");
         }
 
         return true;

@@ -27,6 +27,9 @@ export class UserAuthResetMailListener extends AppMailNotificationListener
                 line1: this.i18nService.t ("_v1_user.account_reset.line1"),
                 line2: this.i18nService.t ("_v1_user.account_reset.line2"),
                 reset: this.i18nService.t ("_v1_user.account_reset.reset"),
+                title: this.i18nService.t ("_v1_user.account_reset.subject"),
+                user_name: event.user?.name,
+                user_email: event.email,
                 link: event.token,
             },
         });

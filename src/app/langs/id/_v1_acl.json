@@ -1,0 +1,25 @@
+{
+    "export": {
+        "started": { "message": "Ekspor dimulai" },
+        "completed": { "message": "Ekspor selesai. Berkas siap diunduh." },
+        "failed": { "message": "Ekspor gagal. Coba lagi nanti." }
+    },
+    "import": {
+        "started": { "message": "Impor dimulai" },
+        "completed": { "message": "Impor selesai. {totalImported} diimpor, {totalSkipped} dilewati." },
+        "failed": { "message": "Impor gagal. Periksa format berkas lalu coba lagi." }
+    },
+    "role": {
+        "not_found": "Role tidak ditemukan",
+        "name_exists": "Nama role ini sudah dipakai",
+        "permissions_not_found": "Satu atau lebih permission tidak ditemukan",
+        "system_role_name_reserved": "Nama role ini sudah dikunci",
+        "system_role_locked": "Role bawaan tidak dapat diubah namanya atau dihapus",
+        "in_use": "Role ini masih dipakai oleh {count} pengguna. Ubah role mereka dahulu."
+    },
+    "permission": {
+        "not_found": "Permission tidak ditemukan",
+        "name_exists": "Nama permission ini sudah dipakai",
+        "system_permission_locked": "Permission bawaan tidak dapat diubah namanya atau dihapus"
+    }
+}

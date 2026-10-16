@@ -40,7 +40,7 @@ export class SeederCommand extends CommandRunner
 
     /**
      * @param {string[]} parameters
-     * @param {SeederCommandType | null} options
+     * @param {SeederCommandType | undefined} options
      * @returns {Promise<void>}
      */
     public async run (

@@ -54,7 +54,7 @@ export class UserAuthResolver
     ): Promise<boolean>
     {
         return Boolean (
-            this.userAuthService.logout (
+            await this.userAuthService.logout (
                 { userId: context.req["user"].sub, },
                 this.userAuthService.graphqlBearerToken (context.req)
             )

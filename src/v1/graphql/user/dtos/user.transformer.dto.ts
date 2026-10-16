@@ -19,25 +19,25 @@ export class UserAuthTransformerDto
     /**
      * @type {number | null}
      */
-    accessTokenTtl: number;
+    accessTokenTtl: number | null;
 
     @Field (type => Number, { nullable: true, })
     /**
      * @type {number | null}
      */
-    refreshTokenTtl: number;
+    refreshTokenTtl: number | null;
 
     @Field (type => String, { nullable: true, })
     /**
      * @type {string | null}
      */
-    accessToken: string;
+    accessToken: string | null;
 
     @Field (type => String, { nullable: true, })
     /**
      * @type {string | null}
      */
-    refreshToken: string;
+    refreshToken: string | null;
 }
 
 @ObjectType ()
@@ -67,6 +67,12 @@ export class UserTransformerDto
      */
     name: string;
 
+    @Field (type => String, { nullable: true, })
+    /**
+     * @type {string | null}
+     */
+    full_name?: string | null;
+
     @Field (type => String)
     /**
      * @type {string}
@@ -77,7 +83,7 @@ export class UserTransformerDto
     /**
      * @type {Date | null}
      */
-    email_verified_at?: Date;
+    email_verified_at?: Date | null;
 
     @Field ()
     /**
@@ -95,5 +101,5 @@ export class UserTransformerDto
     /**
      * @type {Date | null}
      */
-    deleted_at?: Date;
+    deleted_at?: Date | null;
 }

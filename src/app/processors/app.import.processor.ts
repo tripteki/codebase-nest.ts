@@ -52,7 +52,7 @@ export abstract class AppImportProcessor
         const ext = path.extname (fullFilePath).toLowerCase ();
         let data: Record<string, any>[] = [];
 
-        if ([ ".csv", ".xls", ".xlsx", ].includes (ext)) {
+        if ([ ".csv", ".txt", ".xls", ".xlsx", ].includes (ext)) {
 
             const workbook = XLSX.readFile (fullFilePath);
             const sheetName = workbook.SheetNames[0];

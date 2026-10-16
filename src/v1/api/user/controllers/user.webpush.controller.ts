@@ -1,5 +1,6 @@
 import { Request, } from "express";
 import { Controller, HttpCode, Body, Post, Req, UseGuards, } from "@nestjs/common";
+import { Throttle as ThrottleMiddleware, ThrottlerGuard as ThrottleGuardMiddleware, } from "@nestjs/throttler";
 import { ApiTags, ApiBearerAuth, ApiBody, ApiResponse, } from "@nestjs/swagger";
 import { Status, Message, } from "src/app/dtos/app.dto";
 import { AppApiStandardResponsesDecorator, } from "src/app/decorators/app.swagger.decorator";
@@ -15,6 +16,9 @@ import {
 
 @ApiTags ("UserWebpush")
 @Controller ()
+/**
+ * @class {UserWebpushController}
+ */
 export class UserWebpushController
 {
     /**
@@ -30,6 +34,8 @@ export class UserWebpushController
 
     @Post ("/v1/webpush/subscribe")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
@@ -54,6 +60,8 @@ export class UserWebpushController
 
     @Post ("/v1/webpush/unsubscribe")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()

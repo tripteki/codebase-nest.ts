@@ -16,7 +16,12 @@ export class UserAdminImportedBroadcastListener extends AppBroadcastNotification
      */
     public async handle (event: UserAdminImportedEvent): Promise<void>
     {
-        this.emitToUser (event.userId, "v1.user.admin.imported", event);
+        this.emitToUser (event.userId, "v1.user.admin.imported", {
+            userId: event.userId,
+            filename: event.filename,
+            totalImported: event.totalImported,
+            totalSkipped: event.totalSkipped,
+        });
     }
 
     @OnEvent ("v1.user.admin.imported-failed")
@@ -26,6 +31,10 @@ export class UserAdminImportedBroadcastListener extends AppBroadcastNotification
      */
     public async handleFailed (event: UserAdminImportedFailedEvent): Promise<void>
     {
-        this.emitToUser (event.userId, "v1.user.admin.imported-failed", event);
+        this.emitToUser (event.userId, "v1.user.admin.imported-failed", {
+            userId: event.userId,
+            filename: event.filename,
+            error: event.error,
+        });
     }
 }

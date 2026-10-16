@@ -5,9 +5,13 @@ import { ConfigService, } from "@nestjs/config";
 import { I18nService, } from "nestjs-i18n";
 import { EventEmitter2 as EventListenerService, } from "@nestjs/event-emitter";
 import { DatabasePrismaPostgreDriver, } from "src/app/drivers/database.driver";
+import { DateTimeHelper, } from "src/app/helpers/datetime.helper";
 import { AppExportProcessor, } from "src/app/processors/app.export.processor";
 import { UserAdminExportedEvent, } from "src/v1/api/user/events/user.admin.exported.event";
 import { UserAdminExportedFailedEvent, } from "src/v1/api/user/events/user.admin.exported.failed.event";
+import { UserAdminRepository, } from "src/v1/api/user/repositories/user.admin.repository";
+import { Filterization, Orderization, } from "src/app/repositories/app.repository";
+import { User, } from "@prisma/client";
 
 @Injectable ()
 @Processor ("user-admin-queue")
@@ -22,13 +26,17 @@ export class UserAdminExportProcessor extends AppExportProcessor
      * @param {I18nService} i18nService
      * @param {EventListenerService} eventListenerService
      * @param {DatabasePrismaPostgreDriver} prismaPostgreService
+     * @param {DateTimeHelper} dateTimeHelper
+     * @param {UserAdminRepository} userAdminRepository
      * @returns {void}
      */
     constructor (
         protected readonly configService: ConfigService,
         protected readonly i18nService: I18nService,
         protected readonly eventListenerService: EventListenerService,
-        private readonly prismaPostgreService: DatabasePrismaPostgreDriver
+        private readonly prismaPostgreService: DatabasePrismaPostgreDriver,
+        private readonly dateTimeHelper: DateTimeHelper,
+        private readonly userAdminRepository: UserAdminRepository
     )
     {
         super (
@@ -40,40 +48,46 @@ export class UserAdminExportProcessor extends AppExportProcessor
 
     @Process ("export")
     /**
-     * @param {Job} job
+     * @param {Job<{ userId: string; type?: string; orders?: Orderization<User>[]; filters?: Filterization<User>[]; }>} job
      * @returns {Promise<void>}
      */
-    public async handle (job: Job<{ userId: string; type?: string; }>): Promise<void>
+    public async handle (job: Job<{ userId: string; type?: string; orders?: Orderization<User>[]; filters?: Filterization<User>[]; }>): Promise<void>
     {
-        const { userId, type = "csv", } = job.data;
+        const { userId, type = "csv", orders = [], filters = [], } = job.data;
 
         try {
 
-            const users = await this.prismaPostgreService.user.findMany ({
+            const users = await this.userAdminRepository.exportRows (filters, orders);
+
+            if (! users.length) throw new Error ("No users found to export");
+
+            const links = await this.prismaPostgreService.modelHasRole.findMany ({
                 where: {
-                    deleted_at: null,
+                    model_type: "User",
+                    model_id: { in: users.map ((user) => user.id), },
+                    role: { guard_name: "web", },
                 },
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    email_verified_at: true,
-                    created_at: true,
-                    updated_at: true,
-                },
+                include: { role: true, },
+            });
+            const roleByUser = new Map<string, string> ();
+
+            for (const link of links) roleByUser.set (link.model_id, link.role.name);
+
+            const format = this.configService.get<string> ("app.datetimeFormat") || "YYYY-MM-DD HH:mm:ss";
+            const data = users.map ((user) => {
+                const status = user.deleted_at ? "deactivated" : (user.email_verified_at ? "active" : "unverified");
+
+                return {
+                    full_name: user.profile?.full_name || user.name,
+                    email: user.email,
+                    role: roleByUser.get (user.id) || null,
+                    status,
+                    created_at: this.dateTimeHelper.ref () (user.created_at).format (format),
+                };
             });
 
-            const data = users.map ((user) => ({
-
-                [this.i18nService.t ("_v1_user.export.column.id")]: user.id,
-                [this.i18nService.t ("_v1_user.export.column.name")]: user.name,
-                [this.i18nService.t ("_v1_user.export.column.email")]: user.email,
-                [this.i18nService.t ("_v1_user.export.column.email_verified")]: user.email_verified_at ? this.i18nService.t ("_v1_user.common.yes") : this.i18nService.t ("_v1_user.common.no"),
-                [this.i18nService.t ("_v1_user.export.column.created_at")]: user.created_at.toISOString (),
-                [this.i18nService.t ("_v1_user.export.column.updated_at")]: user.updated_at.toISOString (),
-            }));
-
-            const filename = `users_export_${Date.now ()}.${type}`;
+            const stamp = this.dateTimeHelper.ref () ().format ("YYYYMMDD_HHmmss");
+            const filename = `users_export_${stamp}.${type}`;
             const sheetName = this.i18nService.t ("_v1_user.export.sheet_name");
             const { filePath, fileUrl, } = await this.exportFile (data, filename, type, "export", sheetName);
 

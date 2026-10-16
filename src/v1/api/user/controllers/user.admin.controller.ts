@@ -1,5 +1,10 @@
-import { Request, Response, } from "express";
-import { Controller, HttpCode, Body, Param, Query, Get, Post, Put, Patch, Delete, Req, Res, UseGuards, } from "@nestjs/common";
+import { Request, } from "express";
+import { renameSync, } from "fs";
+import { extname, join, } from "path";
+import { diskStorage, } from "multer";
+import { Controller, HttpCode, Body, Param, Query, Get, Post, Put, Patch, Delete, Req, Res, UseGuards, UseInterceptors, UploadedFile, } from "@nestjs/common";
+import { FileInterceptor, } from "@nestjs/platform-express";
+import { Throttle as ThrottleMiddleware, ThrottlerGuard as ThrottleGuardMiddleware, } from "@nestjs/throttler";
 import { ApiTags, ApiParam, ApiQuery, ApiBody, ApiResponse, ApiBearerAuth, ApiOperation, } from "@nestjs/swagger";
 import { Status, Message, } from "src/app/dtos/app.dto";
 import { OffsetPaginationType, CursorPaginationType, OffsetPagination, CursorPagination, Orderization, Filterization, } from "src/app/repositories/app.repository";
@@ -7,6 +12,7 @@ import { AppApiOrderQueryStringDecorator, AppOrderQueryStringDecorator, } from "
 import { AppApiFilterQueryStringDecorator, AppFilterQueryStringDecorator, } from "src/app/decorators/app.filter.decorator";
 import { AppApiCurrentPageQueryStringDecorator, AppApiLimitPageQueryStringDecorator, AppLimitPageQueryStringDecorator, AppCurrentPageQueryStringDecorator, } from "src/app/decorators/app.page.decorator";
 import { AppApiFileDecorator, AppFileDecorator, } from "src/app/decorators/app.file.decorator";
+import { assertAvatarUpload, } from "src/app/http/app.upload.guard";
 import { AppApiIndexCrudSpecDecorator, AppApiDestroyCrudSpecDecorator, AppApiShowCrudSpecDecorator, AppApiStoreCrudSpecDecorator, AppApiUpdateCrudSpecDecorator, } from "src/app/decorators/app.crud.decorator";
 import { ConfigService, } from "@nestjs/config";
 import { UserAdminService, } from "src/v1/api/user/services/user.admin.service";
@@ -16,9 +22,49 @@ import { UserAuthAccessTokenMetadataMiddleware, UserAuthRefreshTokenMetadataMidd
 import { UserImportDescription, UserExportDescription, } from "src/v1/api/user/dtos/user.api.dto";
 import { UserHttpAuthGuardMiddleware, } from "src/v1/api/user/middlewares/user.auth.guard.middleware";
 import { UserHttpVerificationGuardMiddleware, } from "src/v1/api/user/middlewares/user.auth.verification.guard.middleware";
+import { UserHttpPermissionGuardMiddleware, UserPermissionMetadataMiddleware, } from "src/v1/api/user/middlewares/user.permission.guard.middleware";
+
+/**
+ * @type {string}
+ */
+const AVATAR_DESTINATION = join (__dirname, "../../../../../storage/disks/public/avatars/");
+
+/**
+ * @type {ReturnType<typeof FileInterceptor>}
+ */
+const AvatarInterceptor = FileInterceptor ("avatar", {
+    storage: diskStorage ({
+        destination: AVATAR_DESTINATION,
+        filename: (
+            _request: Request,
+            file: Express.Multer.File,
+            callback: (error: Error | null, filename: string) => void
+        ): void => {
+            callback (null, `${Date.now ()}${extname (file.originalname)}`);
+        },
+    }),
+});
+
+/**
+ * @param {Express.Multer.File | undefined} avatar
+ * @returns {string | undefined}
+ */
+function storeAvatar (avatar?: Express.Multer.File): string | undefined
+{
+    if (! avatar) return undefined;
+
+    const filename = `${Date.now ()}${assertAvatarUpload (avatar)}`;
+
+    renameSync (avatar.path, join (AVATAR_DESTINATION, filename));
+
+    return `avatars/${filename}`;
+}
 
 @ApiTags ("UserAdmin")
 @Controller ("/v1/admin/users")
+/**
+ * @class {UserAdminController}
+ */
 export class UserAdminController
 {
     /**
@@ -36,8 +82,11 @@ export class UserAdminController
 
     @Get ("/")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.view")
     @AppApiOrderQueryStringDecorator ("orders")
     @AppApiFilterQueryStringDecorator ("filters")
     @AppApiLimitPageQueryStringDecorator ("limitPage")
@@ -54,12 +103,11 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {Orderization<UserTransformerDto>[]} orders
      * @param {Filterization<UserTransformerDto>[]} filters
      * @param {number} limitPage
      * @param {number} currentPage
-     * @returns {Promise<UserTransformerDto[]>}
+     * @returns {Promise<OffsetPagination<UserTransformerDto>>}
      */
     public async index (
         @Req () request: Request,
@@ -79,8 +127,11 @@ export class UserAdminController
 
     @Get ("/:id")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.view")
     @AppApiShowCrudSpecDecorator ("id")
     @ApiBearerAuth ()
     @ApiResponse ({
@@ -93,7 +144,6 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {UserIdentifierDto} parameters
      * @returns {Promise<UserTransformerDto | string>}
      */
@@ -110,8 +160,12 @@ export class UserAdminController
 
     @Put ("/:id")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.update")
+    @UseInterceptors (AvatarInterceptor)
     @AppApiUpdateCrudSpecDecorator ("id", {
         name: "user",
         email: "user@mail.com",
@@ -129,28 +183,34 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {UserIdentifierDto} parameters
      * @param {UserUpdateValidatorDto} inputs
+     * @param {Express.Multer.File | undefined} avatar
      * @returns {Promise<UserTransformerDto | string>}
      */
     public async update (
         @Req () request: Request,
         @Param () parameters: UserIdentifierDto,
-        @Body () inputs: UserUpdateValidatorDto
+        @Body () inputs: UserUpdateValidatorDto,
+        @UploadedFile () avatar?: Express.Multer.File
     ): Promise<UserTransformerDto | string>
     {
         return await this.userAdminService.update (
             { userId: request["user"].sub, },
             parameters,
-            inputs
+            inputs,
+            storeAvatar (avatar)
         );
     }
 
     @Post ("/")
     @HttpCode (Status.CREATED)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.create")
+    @UseInterceptors (AvatarInterceptor)
     @AppApiStoreCrudSpecDecorator ({
         name: "user",
         email: "user@mail.com",
@@ -168,25 +228,30 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {UserCreateValidatorDto} inputs
+     * @param {Express.Multer.File | undefined} avatar
      * @returns {Promise<UserTransformerDto | string>}
      */
     public async store (
         @Req () request: Request,
-        @Body () inputs: UserCreateValidatorDto
+        @Body () inputs: UserCreateValidatorDto,
+        @UploadedFile () avatar?: Express.Multer.File
     ): Promise<UserTransformerDto | string>
     {
         return await this.userAdminService.create (
             { userId: request["user"].sub, },
-            inputs
+            inputs,
+            storeAvatar (avatar)
         );
     }
 
     @Delete ("/activate/:id")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.restore")
     @AppApiDestroyCrudSpecDecorator ("id")
     @ApiBearerAuth ()
     @ApiResponse ({
@@ -199,7 +264,6 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {UserIdentifierDto} parameters
      * @returns {Promise<UserTransformerDto | string>}
      */
@@ -216,8 +280,11 @@ export class UserAdminController
 
     @Delete ("/deactivate/:id")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.delete")
     @AppApiDestroyCrudSpecDecorator ("id")
     @ApiBearerAuth ()
     @ApiResponse ({
@@ -230,7 +297,6 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {UserIdentifierDto} parameters
      * @returns {Promise<UserTransformerDto | string>}
      */
@@ -245,10 +311,38 @@ export class UserAdminController
         );
     }
 
+    @Delete ("/force-delete/:id")
+    @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
+    @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.delete")
+    @AppApiDestroyCrudSpecDecorator ("id")
+    @ApiBearerAuth ()
+    /**
+     * @param {Request} request
+     * @param {UserIdentifierDto} parameters
+     * @returns {Promise<UserTransformerDto | string>}
+     */
+    public async forceDestroy (
+        @Req () request: Request,
+        @Param () parameters: UserIdentifierDto
+    ): Promise<UserTransformerDto | string>
+    {
+        return await this.userAdminService.forceDelete (
+            { userId: request["user"].sub, },
+            parameters
+        );
+    }
+
     @Put ("/verify/:id")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.update")
     @ApiBearerAuth ()
     @ApiParam ({
         name: "id",
@@ -274,7 +368,6 @@ export class UserAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {UserIdentifierDto} parameters
      * @returns {Promise<UserTransformerDto | string>}
      */
@@ -291,8 +384,11 @@ export class UserAdminController
 
     @Post ("/import")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.import")
     @AppApiFileDecorator ("file", __dirname + "/../../../../../storage/disks/public/import/")
     @ApiBearerAuth ()
     @ApiOperation ({
@@ -332,10 +428,13 @@ export class UserAdminController
 
     @Post ("/export")
     @HttpCode (Status.OK)
-    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
+    @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware, UserHttpPermissionGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
+    @UserPermissionMetadataMiddleware ("user.export")
     @ApiQuery ({
-        name: "type",
+        name: "export_type",
         required: false,
         enum: [ "csv", "xls", "xlsx", ],
         description: "File format: csv (default), xlsx, or xls",
@@ -360,16 +459,22 @@ export class UserAdminController
     /**
      * @param {Request} request
      * @param {UserExportTypeDto} query
+     * @param {Orderization<UserTransformerDto>[]} orders
+     * @param {Filterization<UserTransformerDto>[]} filters
      * @returns {Promise<string>}
      */
     public async export (
         @Req () request: Request,
-        @Query () query: UserExportTypeDto
+        @Query () query: UserExportTypeDto,
+        @AppOrderQueryStringDecorator ("orders") orders: Orderization<UserTransformerDto>[],
+        @AppFilterQueryStringDecorator ("filters") filters: Filterization<UserTransformerDto>[]
     ): Promise<string>
     {
         return await this.userAdminService.export (
             { userId: request["user"].sub, },
-            query.type || "csv"
+            query.export_type || "csv",
+            orders,
+            filters
         );
     }
 }

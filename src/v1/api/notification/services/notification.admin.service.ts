@@ -1,4 +1,4 @@
-import { Injectable, } from "@nestjs/common";
+import { HttpException, Injectable, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
 import { EventEmitter2 as EventListenerService, } from "@nestjs/event-emitter";
 import { AppService, } from "src/app/services/app.service";
@@ -36,7 +36,7 @@ export class NotificationAdminService extends AppService
      * @param {Orderization<NotificationTransformerDto>[]} orders
      * @param {Filterization<NotificationTransformerDto>[]} filters
      * @param {OffsetPaginationType} page
-     * @returns {Promise<NotificationTransformerDto[]>}
+     * @returns {Promise<OffsetPagination<NotificationTransformerDto>>}
      */
     public async all (
         { userId, }: UserAuthIdentifierTransformerDto,
@@ -79,6 +79,8 @@ export class NotificationAdminService extends AppService
 
         } catch (error: any) {
 
+            if (error instanceof HttpException) throw error;
+
             return error.message;
         }
     }
@@ -107,6 +109,8 @@ export class NotificationAdminService extends AppService
 
         } catch (error: any) {
 
+            if (error instanceof HttpException) throw error;
+
             return error.message;
         }
     }
@@ -131,6 +135,8 @@ export class NotificationAdminService extends AppService
             return dto;
 
         } catch (error: any) {
+
+            if (error instanceof HttpException) throw error;
 
             return error.message;
         }
@@ -157,6 +163,8 @@ export class NotificationAdminService extends AppService
 
         } catch (error: any) {
 
+            if (error instanceof HttpException) throw error;
+
             return error.message;
         }
     }
@@ -181,6 +189,8 @@ export class NotificationAdminService extends AppService
             return dto;
 
         } catch (error: any) {
+
+            if (error instanceof HttpException) throw error;
 
             return error.message;
         }

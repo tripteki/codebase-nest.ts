@@ -4,7 +4,6 @@ import { INestApplication, Logger as LoggerService, VersioningType, ValidationPi
 import { useContainer, } from "class-validator";
 import { ConfigService, } from "@nestjs/config";
 import { CorsOptions, } from "@nestjs/common/interfaces/external/cors-options.interface";
-import { AppProviderContract, } from "src/app/contracts/app.provider.contract";
 import { AppModule, } from "src/app/modules/app.module";
 import os from "os";
 import cluster from "cluster";
@@ -14,13 +13,12 @@ import compression from "compression";
 
 /**
  * @class {AppHttpProvider}
- * @implements {AppProviderContract}
  */
 export class AppHttpProvider
 {
     /**
      * @param {(() => INestApplication | Promise<INestApplication>)} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async register (app: (() => INestApplication | Promise<INestApplication>)): Promise<void>
     {
@@ -70,7 +68,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async boot (app: INestApplication): Promise<void>
     {
@@ -84,7 +82,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async bootCors (app: INestApplication): Promise<void>
     {
@@ -99,7 +97,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async bootCsrf (app: INestApplication): Promise<void>
     {
@@ -125,7 +123,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async bootHelmet (app: INestApplication): Promise<void>
     {
@@ -140,7 +138,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async bootCompression (app: INestApplication): Promise<void>
     {
@@ -158,7 +156,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async bootRoute (app: INestApplication): Promise<void>
     {
@@ -172,7 +170,7 @@ export class AppHttpProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async bootValidation (app: INestApplication): Promise<void>
     {

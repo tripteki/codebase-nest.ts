@@ -1,392 +1,155 @@
 <h1 align="center">Codebase NestJS</h1>
 
-This skeleton provides comprehensive backend implementation built with NestJS framework, applying concepts like `Test Driven Development` `Event-Listener Driven Development` `Queue Processing` `WebSocket Real-time` `Scheduled Tasks` `Cached`, implementing design principles like `RESTful API` `GraphQL` `Tight Cohesion & Loose Coupling` `SOLID` `Dependency Injection`, and design patterns like `Gangs of Four (GoF) Repository Pattern` `Data Transfer Object (DTO)` `Middleware Pattern` `Observer Pattern`.
+Backend skeleton built with NestJS. It applies event-listener driven development, queue processing, realtime WebSocket, scheduled tasks, and caching, with RESTful design, SOLID, dependency injection, the repository pattern, and DTOs.
 
-### Features
+It shares one REST contract and the same realtime events with Codebase FastAPI and Codebase Laravel, so Codebase Nuxt and Codebase Next work with any of them.
 
-<table style="width: 100%; border: none;">
-  <tr>
-    <th>No</th>
-    <th>Feature</th>
-    <th>Description</th>
-    <th>Technology</th>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>REST API</td>
-    <td>Comprehensive RESTful API with OpenAPI/Swagger documentation</td>
-    <td>NestJS + Swagger</td>
-  </tr>
-  <tr>
-    <td>2</td>
-    <td>GraphQL API</td>
-    <td>Modern GraphQL API with Apollo Server integration</td>
-    <td>Apollo Server + GraphQL</td>
-  </tr>
-  <tr>
-    <td>3</td>
-    <td>Authentication</td>
-    <td>JWT-based authentication with access/refresh token mechanism</td>
-    <td>JWT + Passport</td>
-  </tr>
-  <tr>
-    <td>4</td>
-    <td>WebSocket</td>
-    <td>Real-time bidirectional event-based communication</td>
-    <td>Socket.IO</td>
-  </tr>
-  <tr>
-    <td>5</td>
-    <td>Queue Processing</td>
-    <td>Asynchronous job processing with Redis-backed queue system</td>
-    <td>Bull + Redis</td>
-  </tr>
-  <tr>
-    <td>6</td>
-    <td>Scheduled Tasks</td>
-    <td>Cron-based task scheduling for periodic operations</td>
-    <td>@nestjs/schedule</td>
-  </tr>
-  <tr>
-    <td>7</td>
-    <td>Database</td>
-    <td>Multi-database support with type-safe ORM</td>
-    <td>Prisma + PostgreSQL + MongoDB</td>
-  </tr>
-  <tr>
-    <td>8</td>
-    <td>Caching</td>
-    <td>Redis-based caching for improved performance</td>
-    <td>Redis + cache-manager</td>
-  </tr>
-  <tr>
-    <td>9</td>
-    <td>Import/Export</td>
-    <td>Bulk user data import/export with CSV/Excel support</td>
-    <td>XLSX + Queue</td>
-  </tr>
-  <tr>
-    <td>10</td>
-    <td>Notifications</td>
-    <td>User & admin notification APIs, Web Push</td>
-    <td>Prisma + web-push</td>
-  </tr>
-  <tr>
-    <td>11</td>
-    <td>Email Service</td>
-    <td>Transactional email notifications with template support</td>
-    <td>Nodemailer + Handlebars</td>
-  </tr>
-  <tr>
-    <td>12</td>
-    <td>Internationalization</td>
-    <td>Multi-language support with i18n</td>
-    <td>nestjs-i18n</td>
-  </tr>
-  <tr>
-    <td>13</td>
-    <td>Rate Limiting</td>
-    <td>API rate limiting and throttling for security</td>
-    <td>@nestjs/throttler</td>
-  </tr>
-  <tr>
-    <td>14</td>
-    <td>Testing</td>
-    <td>End-to-end testing with comprehensive test coverage</td>
-    <td>Jest + Supertest</td>
-  </tr>
-</table>
+## Conventions
 
-Getting Started
----
+| Topic | Rule |
+|-------|------|
+| Brand | Codebase. Primary `#2563eb`, secondary `#84cc16`, tertiary `#1e3a8a` |
+| Roles | `superadmin`, `admin`, `user` |
+| Format | Indent 4, double quotes, trailing commas, space before `(`. Keep JSDoc |
+| Layers | Controller, service, repository. Validator DTO in, transformer DTO out. Events and listeners for side effects |
+| Validation | HTTP 422 `{ "detail": [{ "type", "loc", "msg", "input", "ctx" }] }` |
+| Errors | `{ "detail": "..." }` |
+| Locales | `en`, `id`, `ms` |
+| GraphQL | Not mounted |
+| Mongo | Off when `DATABASE_MONGO_URI` is empty |
+| Rate limits | Production only |
+
+Cursor rules live in `.cursor/rules/`. Scripts run with Bun.
+
+## Features
+
+| Feature | Technology |
+|---------|------------|
+| REST API with Swagger | NestJS |
+| JWT access and refresh tokens | @nestjs/jwt |
+| Realtime | Socket.IO |
+| Queue | Bull + Redis |
+| Scheduled tasks | @nestjs/schedule |
+| Database | Prisma + PostgreSQL |
+| Import and export (CSV, XLS, XLSX) | xlsx |
+| Notifications and Web Push | web-push |
+| Email | Nodemailer + Handlebars |
+| Internationalization | nestjs-i18n (`en`, `id`, `ms`) |
+| Tests | Jest + Supertest |
+
+## Getting Started
 
 ### Requirements
 
-Ensure you have the following installed:
+- Node.js 20+
+- Bun 1.1+
+- PostgreSQL 14+
+- Redis 7+
 
-- Node.js >= 20.15.0
-- PostgreSQL >= 14.x
-- MongoDB >= 6.x
-- Redis >= 7.x
-
-### Installation
+### Setup
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd codebase-nest.ts
-
-# Install dependencies
-npm install
-
-# Generate Prisma clients
-npm run prisma
+bun install
+cp .env.example .env
+bun run cli secret
+bun run postgre:migrate
+bun run cli v1:user:seed
 ```
+
+Put the generated secret in `APP_SECRET`. The seeder creates `superuser@{APP_EMAIL_SERVER}` with password `12345678`.
 
 ### Configuration
 
-Copy the environment configuration file and update with your credentials:
+| Variable | Description |
+|----------|-------------|
+| `APP_SECRET` | Encryption and JWT signing key |
+| `APP_ENV` | `production` turns on rate limits |
+| `FRONTEND_URL` | Base URL for signed links in emails |
+| `CORS_ORIGIN` | Allowed origins as a JSON array or comma list |
+| `DATABASE_POSTGRE_URI` | PostgreSQL connection |
+| `DATABASE_MONGO_URI` | Optional MongoDB connection |
+| `MEMORY_REDIS_*` | Redis for cache and queues |
+| `MAIL_URI` | SMTP connection |
+| `VAPID_*` | Optional Web Push keys (`npx web-push generate-vapid-keys`) |
 
-```bash
-cp .env.example .env
-npm run cli secret
-```
+### Run
 
-Copy the generated value into `APP_SECRET` in `.env` (used for app encryption and JWT signing).
+| Command | Description |
+|---------|-------------|
+| `bun run dev` | Development server on `http://localhost:8000` |
+| `bun run prod` | Build and start the production server |
 
-Optional Web Push (browser push when in-app notifications are created):
+Queues for import, export, and Web Push run inside the application. Swagger UI: `http://localhost:8000/api/docs`
 
-```env
-# Web Push (optional)
-VAPID_SUBJECT=mailto:noreply@tripteki.com
-VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
-```
+## API
 
-Generate keys with `npx web-push generate-vapid-keys`. Set the public key in the client app's public environment variable for Web Push.
+All routes live under `/api/v1`.
 
-Run database migrations:
+| Area | Routes |
+|------|--------|
+| Auth | `/auth/login`, `/auth/register`, `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password/{email}`, `/auth/verify-email/{email}` |
+| Profile | `/users/me`, `/users/me/accesses`, `/users/me/interests` |
+| Notifications | `/notifications/*` |
+| Web Push | `/webpush/subscribe`, `/webpush/unsubscribe` |
+| Admin | `/admin/users`, `/admin/roles`, `/admin/permissions`, `/admin/activities`, `/admin/notifications`, `/admin/settings`, `/admin/dashboard`, `/admin/search` |
 
-```bash
-# PostgreSQL migration
-npm run postgre:migrate
+Login body is `{ "identifierKey": "email" | "name", "identifierValue": "...", "password": "..." }` and returns `{ accessToken, refreshToken, accessTokenTtl, refreshTokenTtl }`. `identifierKey` is optional; without it, a value containing `@` is treated as an email, otherwise as a name.
 
-# MongoDB push schema
-npm run mongo:migrate
-```
+Lists accept `limitPage`, `currentPage`, `orders=field:asc`, and `filters=key:value` and return `{ total, totalPage, perPage, currentPage, nextPage, previousPage, firstPage, lastPage, data }`.
 
-Seed default users:
+## Realtime
 
-```bash
-npm run cli v1:user:seed
-```
+Socket.IO is served at `/socket.io`. Connect with `auth: { token: accessToken }`. Each user joins room `user:{id}`.
 
-### Running the Application
+| Event | Payload |
+|-------|---------|
+| `v1.notification.created` | `id`, `unread` |
+| `v1.admin.refresh` | `userId`, `scopes` |
+| `v1.user.admin.imported` | `userId`, `filename`, `totalImported`, `totalSkipped` |
+| `v1.user.admin.imported-failed` | `userId`, `filename`, `error` |
+| `v1.user.admin.exported` | `userId`, `filename`, `fileUrl` |
+| `v1.user.admin.exported-failed` | `userId`, `error` |
+| `v1.acl.role.admin.*`, `v1.acl.permission.admin.*` | Same as the user import and export events |
+| `v1.user.admin.activated`, `v1.user.admin.deactivated` | `id`, `name`, `email`, `email_verified_at`, `created_at`, `updated_at`, `deleted_at` |
 
-#### Development Mode
-
-```bash
-npm run dev
-```
-
-The server will start at `http://localhost:8000` with the following features enabled:
-
-- Hot-reload on file changes
-- Debug mode enabled
-- Detailed logging
-
-#### Production Mode
-
-```bash
-# Build the application
-npm run build
-
-# Start production server
-npm run prod
-```
-
-#### Queue processing (import/export, web push)
-
-Import/export uses Bull queue `user-admin-queue`. Web Push delivery uses `notifications`. Both processors run when the application is started (Redis required).
-
-### API Overview
-
-All REST routes are prefixed with `/api` in production (e2e tests call `/v1/...` directly).
-
-#### Web Push (`/v1/webpush`)
-
-Requires JWT access token and verified email.
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/webpush/subscribe` | Register push subscription |
-| POST | `/webpush/unsubscribe` | Remove push subscription |
-
-Subscribe body (browser `PushSubscription.toJSON()`):
-
-```json
-{
-  "endpoint": "https://push.example.test/subscription",
-  "keys": { "p256dh": "...", "auth": "..." },
-  "content_encoding": "aesgcm"
-}
-```
-
-Response: `{ "success": true }`
-
-Push is skipped when `VAPID_PUBLIC_KEY` is empty. Subscriptions are stored in `push_subscriptions`.
-
-#### Notifications
-
-User routes: `/v1/notifications/*` (own notifications, verified).
-
-Admin routes: `/v1/admin/notifications/*`.
-
-### API Documentation
-
-#### Swagger UI (REST API)
-
-Access the interactive API documentation at:
-
-```
-http://localhost:8000/api/docs
-```
-
-#### GraphQL Playground
-
-Access the GraphQL API interface at:
-
-```
-http://localhost:8000/graphql
-```
-
-Example query:
-
-```graphql
-query {
-  me {
-    id
-    email
-    name
-  }
-}
-
-query {
-  version
-}
-```
-
-Example mutation:
-
-```graphql
-mutation {
-  login(email: "user@example.com", password: "password") {
-    accessToken
-    refreshToken
-  }
-}
-```
-
-### WebSocket Setup
-
-This application provides real-time notifications for import/export and in-app notification updates using Socket.IO.
-
-#### Available Events
-
-- `v1.notification.created` - New in-app notification (`{ id, unread }`)
-- `v1.user.admin.imported` - User import completed successfully
-- `v1.user.admin.imported-failed` - User import failed
-- `v1.user.admin.exported` - User export completed successfully
-- `v1.user.admin.exported-failed` - User export failed
-
-#### Client Connection Example
+Import and export events go to the admin who started the job. Activate and deactivate events go to the affected user.
 
 ```javascript
-import io from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const socket = io('http://localhost:8000', {
-    transports: ['websocket', 'polling'],
-    extraHeaders: {
-        'Authorization': 'Bearer YOUR_JWT_TOKEN'
-    }
+const socket = io("http://localhost:8000", {
+    path: "/socket.io",
+    transports: ["websocket"],
+    auth: { token: accessToken },
 });
 
-socket.on('v1.notification.created', (data) => {
-    console.log('Notification:', data.id, 'unread:', data.unread);
-});
-
-socket.on('v1.user.admin.imported', (data) => {
-    console.log('Import completed:', data.totalImported, 'users');
-});
-
-socket.on('v1.user.admin.exported', (data) => {
-    console.log('Export ready:', data.fileUrl);
-});
+socket.on("v1.notification.created", (data) => console.log(data.id, data.unread));
+socket.on("v1.user.admin.exported", (data) => console.log(data.fileUrl));
 ```
 
-#### Testing WebSocket
-
-Use the provided HTML client for testing:
+## Testing
 
 ```bash
-open examples/websocket-import-export-client.html
+bun run test
 ```
 
-### Testing
+## Scripts
 
-Run the end-to-end test suite:
+| Script | Description |
+|--------|-------------|
+| `bun run dev` | Start with file watching |
+| `bun run prod` | Build and start for production |
+| `bun run build` | Build the application |
+| `bun run test` | Run the end-to-end tests |
+| `bun run lint` | Format and lint |
+| `bun run prisma` | Generate the Prisma clients |
+| `bun run postgre:migrate` | Run PostgreSQL migrations |
+| `bun run mongo:migrate` | Push the MongoDB schema when `DATABASE_MONGO_URI` is set |
+| `bun run cli secret` | Generate `APP_SECRET` |
+| `bun run cli v1:user:seed` | Seed default users |
+| `bun run doc` | Generate code documentation |
 
-```bash
-# Run all tests
-npm test
-
-# Run with coverage report
-npm run test:e2e
-
-# Run in watch mode
-npm run test -- --watch
-
-# Web Push only
-npm run test:e2e -- --testPathPattern=webpush
-```
-
-E2E tests cover auth, user & profile, user admin, notifications, Web Push, and health checks (`test/v1/*.e2e-spec.ts`).
-
-### Available Scripts
-
-<table style="width: 100%; border: none;">
-  <tr>
-    <th>Script</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td><code>npm run dev</code></td>
-    <td>Start development server with hot-reload</td>
-  </tr>
-  <tr>
-    <td><code>npm run prod</code></td>
-    <td>Start production server</td>
-  </tr>
-  <tr>
-    <td><code>npm run build</code></td>
-    <td>Build application for production</td>
-  </tr>
-  <tr>
-    <td><code>npm test</code></td>
-    <td>Run end-to-end tests</td>
-  </tr>
-  <tr>
-    <td><code>npm run lint</code></td>
-    <td>Lint and format code</td>
-  </tr>
-  <tr>
-    <td><code>npm run prisma</code></td>
-    <td>Generate Prisma clients for PostgreSQL and MongoDB</td>
-  </tr>
-  <tr>
-    <td><code>npm run postgre:migrate</code></td>
-    <td>Run PostgreSQL database migrations</td>
-  </tr>
-  <tr>
-    <td><code>npm run mongo:migrate</code></td>
-    <td>Push MongoDB schema changes</td>
-  </tr>
-  <tr>
-    <td><code>npm run cli secret</code></td>
-    <td>Generate random secret key for JWT (set as <code>APP_SECRET</code> in <code>.env</code>)</td>
-  </tr>
-  <tr>
-    <td><code>npm run cli v1:user:seed</code></td>
-    <td>Seed default users into database</td>
-  </tr>
-  <tr>
-    <td><code>npm run doc</code></td>
-    <td>Generate code documentation with Compodoc</td>
-  </tr>
-</table>
-
-Author
----
+## Author
 
 - Trip Teknologi ([@tripteki](https://linkedin.com/company/tripteki))
 - Hasby Maulana ([@hsbmaulana](https://linkedin.com/in/hsbmaulana))

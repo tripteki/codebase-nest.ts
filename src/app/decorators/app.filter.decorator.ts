@@ -2,6 +2,7 @@
 
 import { applyDecorators, createParamDecorator, ExecutionContext, ParseArrayPipe, } from "@nestjs/common";
 import { ApiQuery, } from "@nestjs/swagger";
+import { parseUnifiedFilters, } from "src/app/helpers/query.parser.helper";
 import { Filterization, } from "src/app/repositories/app.repository";
 
 /**
@@ -19,7 +20,7 @@ export function AppApiFilterQueryStringDecorator (
             required: false,
             type: String,
             description: `The ${field} parameters for filtering the results`,
-            example: '{"field":"id","search":"0"}|{"field":"id","search":"1"}',
+            example: "status:unread,type:info",
         })
     );
 };
@@ -39,7 +40,17 @@ export function AppFilterQueryStringDecorator<T> (
         data: any,
         ctx: ExecutionContext
     ) => {
-        const filters: Filterization<T>[] = ctx.switchToHttp ().getRequest ().query[field] || [];
-        return new ParseArrayPipe ({ items: Filterization<T>, separator, }).transform (filters, { type: "query", });
+        const filters = ctx.switchToHttp ().getRequest ().query[field];
+        const unified = parseUnifiedFilters (filters);
+
+        if (unified) {
+            return unified;
+        }
+
+        if (! String (filters ?? "").includes ("{")) {
+            return [];
+        }
+
+        return new ParseArrayPipe ({ items: Filterization<T>, separator, }).transform (filters || [], { type: "query", });
     }) ();
 };

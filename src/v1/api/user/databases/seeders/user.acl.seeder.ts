@@ -3,35 +3,91 @@ import { ConfigService, } from "@nestjs/config";
 import { I18nService, } from "nestjs-i18n";
 import { DatabasePrismaPostgreDriver, } from "src/app/drivers/database.driver";
 import { DateTimeHelper, } from "src/app/helpers/datetime.helper";
+import { UserEnum, } from "src/v1/api/user/dtos/user.enum";
+import { UserRoleEnum, } from "src/v1/api/user/dtos/user.role.enum";
 import { ulid, } from "ulid";
 
+/**
+ * @type {string}
+ */
 const GUARD_NAME = "web";
+/**
+ * @type {string}
+ */
 const USER_MODEL_TYPE = "User";
 
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-    superadmin: [
-        "user.view",
-        "user.create",
-        "user.update",
-        "user.delete",
-        "user.restore",
-        "user.import",
-        "user.export",
+/**
+ * @type {string[]}
+ */
+const USER_PERMISSIONS = [
+    "user.view",
+    "user.create",
+    "user.update",
+    "user.delete",
+    "user.restore",
+    "user.import",
+    "user.export",
+];
+
+/**
+ * @type {string[]}
+ */
+const ROLE_ACL_PERMISSIONS = [
+    "role.view",
+    "role.create",
+    "role.update",
+    "role.delete",
+    "role.import",
+    "role.export",
+];
+
+/**
+ * @type {string[]}
+ */
+const PERMISSION_ACL_PERMISSIONS = [
+    "permission.view",
+    "permission.create",
+    "permission.update",
+    "permission.delete",
+    "permission.import",
+    "permission.export",
+];
+
+/**
+ * @type {string[]}
+ */
+const ACTIVITY_PERMISSIONS = [
+    "activity.view",
+];
+
+/**
+ * @type {string[]}
+ */
+const NOTIFICATION_PERMISSIONS = [
+    "notification.view",
+    "notification.delete",
+];
+
+/**
+ * @type {Record<UserRoleEnum, string[]>}
+ */
+const ROLE_PERMISSIONS: Record<UserRoleEnum, string[]> = {
+    [UserRoleEnum.Superadmin]: [
+        ...USER_PERMISSIONS,
+        ...ROLE_ACL_PERMISSIONS,
+        ...PERMISSION_ACL_PERMISSIONS,
+        ...ACTIVITY_PERMISSIONS,
+        ...NOTIFICATION_PERMISSIONS,
     ],
-    admin: [
-        "user.view",
-        "user.create",
-        "user.update",
-        "user.delete",
-        "user.restore",
-        "user.import",
-        "user.export",
+    [UserRoleEnum.Admin]: [
+        ...USER_PERMISSIONS,
+        ...ACTIVITY_PERMISSIONS,
+        ...NOTIFICATION_PERMISSIONS,
     ],
-    speaker: ["user.view"],
-    delegate: ["user.view"],
-    exhibitor: ["user.view"],
-    sponsor: ["user.view"],
-    visitor: ["user.view"],
+    [UserRoleEnum.User]: [
+        ...ACTIVITY_PERMISSIONS,
+        ...NOTIFICATION_PERMISSIONS,
+    ],
 };
 
 @Injectable ()
@@ -181,7 +237,7 @@ export class UserAclSeeder
     {
         const user = await this.prismaPostgreService.user.findFirst ({
             where: {
-                name: "superuser",
+                email: `${UserEnum.Superuser}@${this.configService.get<string> ("app.emailServer") ?? ""}`,
                 deleted_at: null,
             },
         });
@@ -190,7 +246,15 @@ export class UserAclSeeder
             return;
         }
 
-        const role = roleMap.superadmin;
+        const role = roleMap[UserRoleEnum.Superadmin];
+
+        await this.prismaPostgreService.modelHasRole.deleteMany ({
+            where: {
+                model_type: USER_MODEL_TYPE,
+                model_id: user.id,
+                role_id: { not: role.id, },
+            },
+        });
 
         await this.prismaPostgreService.modelHasRole.upsert ({
             where: {

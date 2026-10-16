@@ -7,6 +7,7 @@ import { UserProfileRepository, } from "src/v1/api/user/repositories/user.profil
 import { UserAclRepository, } from "src/v1/api/user/repositories/user.acl.repository";
 import { UserAclSeeder, } from "src/v1/api/user/databases/seeders/user.acl.seeder";
 import { UserProfileService, } from "src/v1/api/user/services/user.profile.service";
+import { SecurityNotifier, } from "src/v1/api/user/support/security.notifier";
 import { UserProfileController, } from "src/v1/api/user/controllers/user.profile.controller";
 
 @Module ({
@@ -23,7 +24,9 @@ import { UserProfileController, } from "src/v1/api/user/controllers/user.profile
 
         UserProfileRepository,
         UserProfileService,
+        UserAclRepository,
         UserAclSeeder,
+        SecurityNotifier,
     ],
 
     providers: [
@@ -31,6 +34,7 @@ import { UserProfileController, } from "src/v1/api/user/controllers/user.profile
         UserProfileRepository,
         UserAclRepository,
         UserAclSeeder,
+        SecurityNotifier,
         UserProfileService,
     ],
 

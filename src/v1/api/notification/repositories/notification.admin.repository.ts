@@ -41,7 +41,7 @@ export class NotificationAdminRepository extends AppPostgreRepository
      * @param {Orderization<Notification>[]} orders
      * @param {Filterization<Notification>[]} filters
      * @param {OffsetPaginationType} page
-     * @returns {Promise<Notification[]>}
+     * @returns {Promise<OffsetPagination<Notification>>}
      */
     public async allOffset (
         userId: string,
@@ -70,7 +70,7 @@ export class NotificationAdminRepository extends AppPostgreRepository
      * @param {Orderization<Notification>[]} orders
      * @param {Filterization<Notification>[]} filters
      * @param {CursorPaginationType} page
-     * @returns {Promise<Notification[]>}
+     * @returns {Promise<CursorPagination<Notification>>}
      */
     public async allCursor (
         userId: string,
@@ -189,7 +189,6 @@ export class NotificationAdminRepository extends AppPostgreRepository
         return this.mutate<Notification> (async (transaction: DatabasePrismaPostgreConstraint.TransactionClient): Promise<Notification | null> => {
             return await transaction.notification.update ({
                 where: {
-                    deleted_at: { not: null, },
                     id,
                 },
                 data: {

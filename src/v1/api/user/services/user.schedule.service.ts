@@ -26,12 +26,12 @@ export class UserScheduleService extends AppService
         super ();
     }
 
-    /**
-     * @returns {Promise<void>}
-     */
     @Cron ("* * * * *", {
         name: "clean",
     })
+    /**
+     * @returns {Promise<void>}
+     */
     public async handleClean (): Promise<void>
     {
         this.loggerService.log ("Cleaning...");

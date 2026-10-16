@@ -100,9 +100,24 @@ export class UserTransformerDto
     name: string;
 
     /**
+     * @type {string | null}
+     */
+    full_name?: string | null;
+
+    /**
      * @type {string}
      */
     email: string;
+
+    /**
+     * @type {string | null}
+     */
+    avatar?: string | null;
+
+    /**
+     * @type {string | null}
+     */
+    avatar_url?: string | null;
 
     /**
      * @type {Date | null}
@@ -123,6 +138,11 @@ export class UserTransformerDto
      * @type {Date | null}
      */
     deleted_at?: Date | null;
+
+    /**
+     * @type {string | null}
+     */
+    role?: string | null;
 }
 
 /**

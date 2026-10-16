@@ -1,0 +1,25 @@
+{
+    "export": {
+        "started": { "message": "Export started" },
+        "completed": { "message": "Export completed. The file is ready to download." },
+        "failed": { "message": "Export failed. Please try again later." }
+    },
+    "import": {
+        "started": { "message": "Import started" },
+        "completed": { "message": "Import completed. {totalImported} imported, {totalSkipped} skipped." },
+        "failed": { "message": "Import failed. Check the file format and try again." }
+    },
+    "role": {
+        "not_found": "Role not found",
+        "name_exists": "This role name is already used",
+        "permissions_not_found": "One or more permissions were not found",
+        "system_role_name_reserved": "This role name is reserved",
+        "system_role_locked": "Built-in roles cannot be renamed or deleted",
+        "in_use": "This role is still assigned to {count} users. Change their role first."
+    },
+    "permission": {
+        "not_found": "Permission not found",
+        "name_exists": "This permission name is already used",
+        "system_permission_locked": "Built-in permissions cannot be renamed or deleted"
+    }
+}

@@ -121,6 +121,11 @@ export class OffsetPagination<T>
     /**
      * @type {number}
      */
+    total: number;
+
+    /**
+     * @type {number}
+     */
     totalPage: number;
 
     /**

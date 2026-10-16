@@ -1,46 +1,48 @@
 {
     "common": {
-        "close_greeting": "Regards. {appName}.",
-        "start_greeting": "Hello {name}!",
+        "close_greeting": "Best regards,\n{appName}",
+        "start_greeting": "Hi {name},",
         "yes": "Yes",
         "no": "No"
     },
-
+    "mail": {
+        "user_information": "User information",
+        "full_name": "Full name",
+        "email_address": "Email address",
+        "thanks": "Thanks",
+        "rights": "All rights reserved."
+    },
     "account_activated": {
-        "subject": "Your Account Has Been Activated",
-        "line": "We are excited to let you know that your account has been successfully activated.",
-        "thank_you": "Thank you for being a part of our community!"
+        "subject": "Your account is active",
+        "line": "Your account is active. You can sign in and continue.",
+        "thank_you": "Thanks"
     },
-
     "account_deactivated": {
-        "subject": "Your Account Has Been Deactivated",
-        "line": "We regret to inform you that your account has been deactivated. If you think this is a mistake, please contact support.",
-        "thank_you": "We hope to resolve this issue as soon as possible."
+        "subject": "Your account is inactive",
+        "line": "Your account has been deactivated. Sign-in stays paused until an admin turns it back on.",
+        "thank_you": "Thanks"
     },
-
     "account_registered": {
-        "subject": "Your Account Verification Process",
-        "line1": "Please click the link button below to verify your email address.",
-        "line2": "If you did not create an account, please disregard this process.",
-        "verify": "Verify E-Mail Address"
+        "subject": "Verify your email",
+        "line1": "Thanks for joining. Use the button below to confirm your email and finish setting up your account.",
+        "line2": "If you did not create an account, you can safely ignore this email.",
+        "verify": "Verify email"
     },
-
     "account_reset": {
-        "subject": "Your Account Reset Password Process",
-        "line1": "Please click the link button below to reset your password.",
-        "line2": "If you did not reset password, please disregard this process.",
-        "reset": "Reset Password"
+        "subject": "Reset your password",
+        "line1": "We received a request to reset your password. Use the button below to choose a new one. The link works for 60 minutes.",
+        "line2": "If you did not ask for this, you can ignore this email. Your password will stay the same.",
+        "reset": "Update password"
     },
-
     "export": {
         "started": {
-            "message": "Export started. You will receive a notification when it's ready."
+            "message": "Export started"
         },
         "completed": {
-            "message": "Your user export has been completed successfully."
+            "message": "Export completed successfully. Your file is ready for download."
         },
         "failed": {
-            "message": "Your user export has failed."
+            "message": "Export failed. Please try again later."
         },
         "sheet_name": "Users",
         "column": {
@@ -54,13 +56,13 @@
     },
     "import": {
         "started": {
-            "message": "Import started. You will receive a notification when it's ready."
+            "message": "Import started"
         },
         "completed": {
-            "message": "Your user import has been completed successfully. {totalImported} imported, {totalSkipped} skipped."
+            "message": "Import completed successfully. {totalImported} users imported, {totalSkipped} users skipped."
         },
         "failed": {
-            "message": "Your user import has failed."
+            "message": "Import failed. Please check the file format and try again."
         },
         "column": {
             "id": "ID",
@@ -71,5 +73,67 @@
             "created_at": "Created At",
             "updated_at": "Updated At"
         }
+    },
+    "roles": {
+        "superadmin": "Superadmin",
+        "admin": "Admin",
+        "user": "User"
+    },
+    "account_created": {
+        "title": "Account created",
+        "body": "An admin created your account with the role {role}.",
+        "subject": "Your account is ready",
+        "line1": "An admin created an account for you with the role {role}. Sign in with this email address.",
+        "line2": "This email does not contain a password. Use Forgot password to set your own.",
+        "login": "Sign in",
+        "forgot": "Forgot password"
+    },
+    "account_email_change": {
+        "subject": "Confirm your new email",
+        "line1": "You asked to use this address for your account. Use the button below to confirm it. The link works for 60 minutes.",
+        "line2": "Until you confirm, you can keep signing in with your old email. If you did not ask for this, you can ignore this email.",
+        "verify": "Confirm email"
+    },
+    "role_changed": {
+        "title": "Role changed",
+        "body": "Your role is now {role}."
+    },
+    "registration": {
+        "verified_title": "Registration complete",
+        "verified_body": "Your email is verified and your account is ready.",
+        "new_title": "A new user registered",
+        "new_body": "A new user registered: {full_name} <{email}> · Role: {role}"
+    },
+    "security": {
+        "password_subject": "Your password was changed",
+        "password_line_self": "You changed your password at {time}.",
+        "password_line_admin": "Admin {admin} changed your password at {time}.",
+        "password_warning": "If you did not request this, use Forgot password and contact an admin.",
+        "login": "Sign in",
+        "email_old_subject": "Your account email was changed",
+        "email_old_line": "Your account email was changed to {email}.",
+        "email_old_warning": "If you did not request this, contact an admin.",
+        "email_new_subject": "This email is now used to sign in",
+        "email_new_line": "This email is now used to sign in to your account."
+    },
+    "auth": {
+        "missing_token": "Not Authorized",
+        "invalid_token": "Not Authorized",
+        "forbidden": "You do not have permission for this action",
+        "role_forbidden": "You cannot assign this role",
+        "role_self_forbidden": "You cannot change your own role",
+        "account_locked": "Only a superadmin can change this account",
+        "email_already_exists": "Email already exists",
+        "invalid_credentials": "Invalid credentials",
+        "reset_link_sent": "If the email exists, a reset link has been sent",
+        "verification_email_sent": "Verification email sent",
+        "name_already_exists": "Name already exists",
+        "password_mismatch": "Password and password confirmation must match",
+        "password_confirmation_required": "Password confirmation is required when password is provided",
+        "password_required": "Password is required when password confirmation is provided",
+        "email_not_verified": "Please verify your email before logging in",
+        "invalid_or_expired_verify_link": "This verification link has expired or was already used. Please ask for a new one.",
+        "user_not_found": "User not found",
+        "invalid_or_expired_reset_token": "Invalid or expired reset token"
     }
 }

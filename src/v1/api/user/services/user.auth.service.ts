@@ -1,6 +1,7 @@
-import { Request, Response, } from "express";
+import { createHash, randomUUID, } from "crypto";
+import { Request, } from "express";
 import { Socket, } from "socket.io";
-import { Injectable, Inject, } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpException, Injectable, Inject, NotFoundException, UnauthorizedException, UnprocessableEntityException, } from "@nestjs/common";
 import { ConfigService, } from "@nestjs/config";
 import { EventEmitter2 as EventListenerService, } from "@nestjs/event-emitter";
 import { I18nService, } from "nestjs-i18n";
@@ -13,11 +14,15 @@ import { UserAuthLoggedOutEvent, } from "src/v1/api/user/events/user.auth.logged
 import { UserAuthRefreshedEvent, } from "src/v1/api/user/events/user.auth.refreshed.event";
 import { UserAuthRegisteredEvent, } from "src/v1/api/user/events/user.auth.registered.event";
 import { UserAuthResetEvent, } from "src/v1/api/user/events/user.auth.reset.event";
+import { UserRoleEnum, } from "src/v1/api/user/dtos/user.role.enum";
+import { UserAclRepository, } from "src/v1/api/user/repositories/user.acl.repository";
 import { UserAuthRepository, } from "src/v1/api/user/repositories/user.auth.repository";
+import { SecurityNotifier, } from "src/v1/api/user/support/security.notifier";
 import { UserAuthAccessTokenEnum, UserAuthRefreshTokenEnum, } from "src/v1/api/user/dtos/user.auth.enum";
 import { UserAuthIdentifierTransformerDto, UserAuthIdentifierEmailTransformerDto, UserAuthTransformerDto, UserTransformerDto, UserResetterTransformerDto, } from "src/v1/api/user/dtos/user.transformer.dto";
 import { UserAuthDto, UserCreateValidatorDto, UserResetterUpdateValidatorDto, } from "src/v1/api/user/dtos/user.validator.dto";
 import { plainToClass, } from "class-transformer";
+import { unprocessableDetail, } from "src/app/http/app.validation.response";
 
 @Injectable ()
 /**
@@ -33,7 +38,9 @@ export class UserAuthService extends AppService
      * @param {JwtService} jwtService
      * @param {CacheService} cacheService
      * @param {UserAuthRepository} userAuthRepository
+     * @param {UserAclRepository} userAclRepository
      * @param {UrlHelper} urlHelper
+     * @param {SecurityNotifier} securityNotifier
      * @returns {void}
      */
     constructor (
@@ -43,15 +50,31 @@ export class UserAuthService extends AppService
         protected readonly jwtService: JwtService,
         @Inject (CACHE_MANAGER) protected readonly cacheService: CacheService,
         protected readonly userAuthRepository: UserAuthRepository,
-        protected readonly urlHelper: UrlHelper
+        protected readonly userAclRepository: UserAclRepository,
+        protected readonly urlHelper: UrlHelper,
+        protected readonly securityNotifier: SecurityNotifier
     )
     {
         super ();
     }
 
     /**
+     * @param {{ id?: string; email?: string; name?: string }} user
+     * @returns {Promise<string>}
+     */
+    protected async eventDisplayName (
+        user: { id?: string; email?: string; name?: string }
+    ): Promise<string>
+    {
+        const fallback = user?.email || user?.name || "";
+
+        if (! user?.id) return fallback;
+
+        return this.userAuthRepository.displayName (user.id, fallback);
+    }
+
+    /**
      * @param {Request} request
-     * @param {Response} response
      * @returns {string | undefined}
      */
     public httpBearerToken (request: Request): string | undefined
@@ -67,17 +90,32 @@ export class UserAuthService extends AppService
      */
     public wsBearerToken (ws: Socket): string | undefined
     {
+        const authToken = ws?.handshake?.auth?.token;
+
+        if (typeof authToken === "string" && authToken) {
+            return authToken;
+        }
+
+        const query = ws?.handshake?.query ?? {};
+        const queryToken = query.token ?? query.access_token;
+        const fromQuery = Array.isArray (queryToken) ? queryToken[0] : queryToken;
+
+        if (typeof fromQuery === "string" && fromQuery) {
+            return fromQuery;
+        }
+
         const [type, token] = ws?.handshake?.headers?.authorization?.split (" ") ?? [];
 
-        return type === "Bearer" ? token : undefined;
+        return type === "Bearer" && token ? token : undefined;
     }
 
     /**
-     * @returns {Promise<string[]>}
+     * @param {string} token
+     * @returns {string}
      */
-    protected async tokens (): Promise<string[]>
+    protected tokenKey (token: string): string
     {
-        return await this.cacheService.get ("tokens") ?? [];
+        return `tokens:${createHash ("sha256").update (token).digest ("hex")}`;
     }
 
     /**
@@ -86,9 +124,7 @@ export class UserAuthService extends AppService
      */
     public async checkToken (token: string): Promise<boolean>
     {
-        const tokens: string[] = await this.tokens ();
-
-        return tokens.includes (token);
+        return Boolean (await this.cacheService.get (this.tokenKey (token)));
     }
 
     /**
@@ -97,17 +133,13 @@ export class UserAuthService extends AppService
      */
     public async addToken (token: string): Promise<void>
     {
-        const
-
-        tokens: string[] = await this.tokens (),
-        ttl: number = this.configService.get<number> (
+        const ttl: number = this.configService.get<number> (
             "auth.signOptions.expiresIn"
         ) + this.configService.get<number> (
             "auth.refreshOptions.refreshExpiresIn"
         ) * 1000;
 
-        tokens.push (token);
-        await this.cacheService.set ("tokens", tokens, ttl);
+        await this.cacheService.set (this.tokenKey (token), true, ttl);
     }
 
     /**
@@ -116,18 +148,7 @@ export class UserAuthService extends AppService
      */
     public async removeToken (token: string): Promise<void>
     {
-        const
-
-        tokens: string[] = await this.tokens (),
-        ttl: number = this.configService.get<number> (
-            "auth.signOptions.expiresIn"
-        ) + this.configService.get<number> (
-            "auth.refreshOptions.refreshExpiresIn"
-        ) * 1000;
-
-        tokens.indexOf (token) !== -1 &&
-        tokens.splice (tokens.indexOf (token), 1) &&
-        await this.cacheService.set ("tokens", tokens, ttl);
+        await this.cacheService.del (this.tokenKey (token));
     }
 
     /**
@@ -169,11 +190,13 @@ export class UserAuthService extends AppService
             accessTokenTtl,
             refreshTokenTtl,
             accessToken: await this.jwtService.signAsync ({
+                jti: randomUUID (),
                 scope: UserAuthAccessTokenEnum,
                 expiresIn: accessTokenTtl,
                 ... payloadDto,
             }),
             refreshToken: await this.jwtService.signAsync ({
+                jti: randomUUID (),
                 scope: UserAuthRefreshTokenEnum,
                 remember,
                 expiresIn: refreshTokenTtl,
@@ -200,18 +223,31 @@ export class UserAuthService extends AppService
             const userDto: UserTransformerDto | null = plainToClass (UserTransformerDto, await this.userAuthRepository.login (
                 data
             ));
+
+            if (! userDto?.email_verified_at) {
+                throw new ForbiddenException ({
+                    code: "email_not_verified",
+                    message: this.i18nService.t ("_v1_user.auth.email_not_verified"),
+                });
+            }
+
             const authDto: UserAuthTransformerDto = await this.attempt (
                 { userId: userDto.id, },
                 this.resolveRemember (data.remember)
             );
 
-            if (authDto) this.eventListenerService.emit ("v1.user.auth.loggedin", new UserAuthLoggedInEvent (userDto));
+            if (authDto && userDto) {
+                userDto.name = await this.eventDisplayName (userDto);
+                this.eventListenerService.emit ("v1.user.auth.loggedin", new UserAuthLoggedInEvent (userDto));
+            }
 
             return authDto;
 
         } catch (error: any) {
 
-            return error.message;
+            if (error instanceof HttpException && ! (error instanceof NotFoundException)) throw error;
+
+            throw new UnauthorizedException (this.i18nService.t ("_v1_user.auth.invalid_credentials"));
         }
     }
 
@@ -233,7 +269,10 @@ export class UserAuthService extends AppService
 
             await this.removeToken (token);
 
-            if (dto) this.eventListenerService.emit ("v1.user.auth.loggedout", new UserAuthLoggedOutEvent (dto));
+            if (dto) {
+                dto.name = await this.eventDisplayName (dto);
+                this.eventListenerService.emit ("v1.user.auth.loggedout", new UserAuthLoggedOutEvent (dto));
+            }
 
             return dto;
 
@@ -303,15 +342,89 @@ export class UserAuthService extends AppService
         data: UserCreateValidatorDto
     ): Promise<UserTransformerDto | string>
     {
+        if (data.password !== data.password_confirmation) {
+            throw new UnprocessableEntityException (unprocessableDetail (this.i18nService.t ("_v1_user.auth.password_mismatch"), data));
+        }
+
         try {
 
-            const dto: UserTransformerDto | null = plainToClass (UserTransformerDto, await this.userAuthRepository.register (
-                data
-            ));
+            if (await this.userAuthRepository.emailTaken (data.email)) {
+                throw new BadRequestException (this.i18nService.t ("_v1_user.auth.email_already_exists"));
+            }
 
-            if (dto) this.eventListenerService.emit ("v1.user.auth.registered", new UserAuthRegisteredEvent (dto));
+            if (data.name && await this.userAuthRepository.nameTaken (data.name)) {
+                throw new BadRequestException (this.i18nService.t ("_v1_user.auth.name_already_exists"));
+            }
+
+            const created = await this.userAuthRepository.register (data);
+
+            if (created) await this.userAclRepository.assignDefaultUserRole (created.id);
+
+            const safe = created ? { ... created, } as Record<string, unknown> : null;
+
+            if (safe) {
+                delete safe.password;
+                delete safe.profile;
+            }
+
+            const dto: UserTransformerDto | null = safe
+                ? plainToClass (UserTransformerDto, {
+                    ... safe,
+                    role: UserRoleEnum.User,
+                    full_name: data.name ?? null,
+                    avatar: null,
+                    avatar_url: null,
+                })
+                : null;
+
+            if (dto) {
+                const eventUser = plainToClass (UserTransformerDto, { ... dto, });
+
+                eventUser.name = await this.eventDisplayName (eventUser);
+                this.eventListenerService.emit ("v1.user.auth.registered", new UserAuthRegisteredEvent (eventUser));
+                this.eventListenerService.emit ("v1.admin.refresh", {
+                    subjectType: "User",
+                    causerId: dto.id,
+                });
+            }
 
             return dto;
+
+        } catch (error: any) {
+
+            if (error instanceof HttpException) throw error;
+
+            return error.message;
+        }
+    }
+
+    /**
+     * @param {UserAuthIdentifierEmailTransformerDto} userEmail
+     * @param {string | undefined} signed
+     * @returns {Promise<UserTransformerDto | string>}
+     */
+    public async verify (
+        { userEmail, }: UserAuthIdentifierEmailTransformerDto,
+        signed?: string
+    ): Promise<UserTransformerDto | string>
+    {
+        try {
+
+            const confirmed = await this.confirmEmailChange (userEmail, signed || "");
+
+            if (confirmed) return confirmed;
+
+            const user = await this.userAuthRepository.verify (userEmail);
+
+            if (user) {
+                this.eventListenerService.emit ("v1.user.registration.verified", { id: user.id, actorId: null, });
+                this.eventListenerService.emit ("v1.admin.refresh", {
+                    subjectType: "User",
+                    causerId: user.id,
+                });
+            }
+
+            return user ? plainToClass (UserTransformerDto, user) : user;
 
         } catch (error: any) {
 
@@ -320,25 +433,39 @@ export class UserAuthService extends AppService
     }
 
     /**
-     * @param {UserAuthIdentifierEmailTransformerDto} userEmail
-     * @returns {Promise<UserTransformerDto | string>}
+     * @param {string} newEmail
+     * @param {string} signed
+     * @returns {Promise<UserTransformerDto | null>}
      */
-    public async verify (
-        { userEmail, }: UserAuthIdentifierEmailTransformerDto
-    ): Promise<UserTransformerDto | string>
+    public async confirmEmailChange (newEmail: string, signed: string): Promise<UserTransformerDto | null>
     {
-        try {
+        const key = `email-change:${(newEmail || "").trim ().toLowerCase ()}`;
+        const raw = await this.cacheService.get<string> (key);
 
-            const dto: UserTransformerDto | null = plainToClass (UserTransformerDto, await this.userAuthRepository.verify (
-                userEmail
-            ));
+        if (! raw || ! signed) return null;
 
-            return dto;
+        const pending = JSON.parse (raw) as { user_id?: string; token?: string; };
 
-        } catch (error: any) {
+        if (String (pending.token) !== String (signed) || ! pending.user_id) return null;
 
-            return error.message;
-        }
+        await this.cacheService.del (key);
+
+        const user = await this.userAuthRepository.findOneById (pending.user_id);
+
+        if (! user) return null;
+
+        if (await this.userAuthRepository.emailTaken (newEmail, user.id)) return null;
+
+        const previousEmail = user.email;
+        const updated = await this.userAuthRepository.changeEmail (user.id, newEmail.trim ());
+
+        await this.securityNotifier.emailChanged (updated, previousEmail, false);
+        this.eventListenerService.emit ("v1.admin.refresh", {
+            subjectType: "User",
+            causerId: updated.id,
+        });
+
+        return plainToClass (UserTransformerDto, updated);
     }
 
     /**
@@ -355,14 +482,34 @@ export class UserAuthService extends AppService
                 userId
             ));
 
-            if (dto) this.eventListenerService.emit ("v1.user.auth.reverify", new UserAuthRegisteredEvent (dto));
+            if (dto) {
+                dto.name = await this.eventDisplayName (dto);
+                this.eventListenerService.emit ("v1.user.auth.reverify", new UserAuthRegisteredEvent (dto));
+            }
 
-            return this.i18nService.t ("auth.verification-sent");
+            return this.i18nService.t ("_v1_user.auth.verification_email_sent");
 
         } catch (error: any) {
 
             return error.message;
         }
+    }
+
+    /**
+     * @param {string} email
+     * @returns {Promise<string>}
+     */
+    public async reverifyByEmail (email: string): Promise<string>
+    {
+        const sent = this.i18nService.t ("_v1_user.auth.verification_email_sent");
+        const user = await this.userAuthRepository.findOneByEmail (email);
+
+        if (! user || user.email_verified_at) return sent;
+
+        user.name = await this.eventDisplayName (user);
+        this.eventListenerService.emit ("v1.user.auth.reverify", new UserAuthRegisteredEvent (user));
+
+        return sent;
     }
 
     /**
@@ -373,15 +520,21 @@ export class UserAuthService extends AppService
         data: UserResetterUpdateValidatorDto
     ): Promise<UserTransformerDto | string>
     {
+        if (data.password !== data.password_confirmation) {
+            throw new UnprocessableEntityException (unprocessableDetail (this.i18nService.t ("_v1_user.auth.password_mismatch"), data));
+        }
+
         try {
 
-            const dto: UserTransformerDto | null = plainToClass (UserTransformerDto, await this.userAuthRepository.reset (
+            const user = await this.userAuthRepository.reset (
                 data.token,
                 data.email,
                 data.password
-            ));
+            );
 
-            return dto;
+            if (user) await this.securityNotifier.passwordChanged (user, null);
+
+            return user ? plainToClass (UserTransformerDto, user) : user;
 
         } catch (error: any) {
 
@@ -397,6 +550,11 @@ export class UserAuthService extends AppService
         { userEmail, }: UserAuthIdentifierEmailTransformerDto
     ): Promise<string>
     {
+        const sent = this.i18nService.t ("_v1_user.auth.reset_link_sent");
+        const existing = await this.userAuthRepository.findOneByEmail (userEmail);
+
+        if (! existing) return sent;
+
         try {
 
             const userToken: string = this.urlHelper.ref ().sign (`${this.configService.get<string> ("app.frontendUrl")}/auth/reset-password/${userEmail}`);
@@ -406,13 +564,16 @@ export class UserAuthService extends AppService
                 userEmail
             ));
 
-            if (dto) this.eventListenerService.emit ("v1.user.auth.reset", new UserAuthResetEvent ({ ... dto, token: userToken, }));
+            if (dto) {
+                if (dto.user) dto.user.name = await this.eventDisplayName (dto.user);
+                this.eventListenerService.emit ("v1.user.auth.reset", new UserAuthResetEvent ({ ... dto, token: userToken, }));
+            }
 
-            return this.i18nService.t ("passwords.sent");
+            return sent;
 
         } catch (error: any) {
 
-            return error.message;
+            return sent;
         }
     }
 }

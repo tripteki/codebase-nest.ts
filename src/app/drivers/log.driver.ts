@@ -51,19 +51,7 @@ export class LogDriver implements WinstonModuleOptionsFactory
 };
 
 /**
- * @interface {LogOptionsFactory}
- */
-interface LogOptionsFactory
-{
-    /**
-     * @returns {Transport[]}
-     */
-    createLogOptions (): Transport[];
-};
-
-/**
  * @class {LogConsoleDriver}
- * @implements {LogOptionsFactory}
  */
 export class LogConsoleDriver
 {
@@ -81,7 +69,6 @@ export class LogConsoleDriver
 
 /**
  * @class {LogFileDriver}
- * @implements {LogOptionsFactory}
  */
 export class LogFileDriver
 {
@@ -112,7 +99,6 @@ export class LogFileDriver
 
 /**
  * @class {LogElasticDriver}
- * @implements {LogOptionsFactory}
  */
 export class LogElasticDriver
 {

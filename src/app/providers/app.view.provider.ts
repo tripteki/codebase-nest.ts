@@ -1,19 +1,19 @@
 "use strict";
 
 import { INestApplication, } from "@nestjs/common";
+import { NestExpressApplication, } from "@nestjs/platform-express";
 import { ConfigService, } from "@nestjs/config";
 import { join, } from "path";
 import hbs from "hbs";
 
 /**
  * @class {AppViewProvider}
- * @implements {AppProviderContract}
  */
 export class AppViewProvider
 {
     /**
      * @param {(() => INestApplication | Promise<INestApplication>)} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async register (app: (() => INestApplication | Promise<INestApplication>)): Promise<void>
     {
@@ -22,18 +22,18 @@ export class AppViewProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async boot (app: INestApplication): Promise<void>
     {
-        AppViewProvider.bootView (app);
+        AppViewProvider.bootView (app as NestExpressApplication);
     }
 
     /**
-     * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @param {NestExpressApplication} app
+     * @returns {Promise<void>}
      */
-    public static async bootView (app): Promise<void>
+    public static async bootView (app: NestExpressApplication): Promise<void>
     {
         const configService: ConfigService = app.get (
             ConfigService

@@ -2,10 +2,11 @@
 
 import { Request, Response, } from "express";
 import { FileInterceptor, } from "@nestjs/platform-express";
-import { applyDecorators, UseInterceptors, UploadedFile, ParseFilePipe, FileTypeValidator, } from "@nestjs/common";
+import { applyDecorators, UseInterceptors, UploadedFile, Injectable, PipeTransform, UnprocessableEntityException, } from "@nestjs/common";
 import { ApiConsumes, ApiParam, ApiBody, } from "@nestjs/swagger";
 import { diskStorage, } from "multer";
 import { extname, } from "path";
+import { assertImportUpload, } from "src/app/http/app.upload.guard";
 
 /**
  * @function {AppApiFileDecorator}
@@ -50,20 +51,37 @@ export function AppApiFileDecorator (
     );
 };
 
+@Injectable ()
+/**
+ * @class {AppImportFilePipe}
+ */
+export class AppImportFilePipe implements PipeTransform<Express.Multer.File | undefined, Express.Multer.File>
+{
+    /**
+     * @param {Express.Multer.File | undefined} file
+     * @returns {Express.Multer.File}
+     */
+    public transform (file?: Express.Multer.File): Express.Multer.File
+    {
+        if (! file) {
+            throw new UnprocessableEntityException ({
+                detail: [
+                    { type: "missing", loc: [ "body", "file", ], msg: "Field required", input: null, ctx: {}, },
+                ],
+            });
+        }
+
+        assertImportUpload (file);
+
+        return file;
+    }
+}
+
 /**
  * @function {AppFileDecorator}
- * @param {string | RegExp} fileType
  * @returns {ParameterDecorator}
  */
-export function AppFileDecorator (
-    fileType: string | RegExp = /^(text\/csv|application\/vnd\.ms-excel|application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet)$/
-): ParameterDecorator
+export function AppFileDecorator (): ParameterDecorator
 {
-    return UploadedFile (
-        new ParseFilePipe ({
-            validators: [
-                new FileTypeValidator ({ fileType, }),
-            ],
-        })
-    );
+    return UploadedFile (AppImportFilePipe);
 };

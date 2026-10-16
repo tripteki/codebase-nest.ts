@@ -1,4 +1,4 @@
-import { IsDefined, IsOptional, IsIn, } from "class-validator";
+import { IsBoolean, IsDefined, IsOptional, IsIn, } from "class-validator";
 import { InputType, Field, } from "@nestjs/graphql";
 
 @InputType ()
@@ -28,4 +28,12 @@ export class UserAuthDto
      * @type {string}
      */
     password: string;
+
+    @Field (type => Boolean, { nullable: true, })
+    @IsOptional ()
+    @IsBoolean ()
+    /**
+     * @type {boolean | null}
+     */
+    remember?: boolean | null;
 }

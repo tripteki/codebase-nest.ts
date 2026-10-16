@@ -38,11 +38,34 @@ export class NotificationUserRepository extends AppPostgreRepository
     }
 
     /**
+     * @param {Orderization<Notification>[]} orders
+     * @returns {Record<string, "asc" | "desc">[]}
+     */
+    private notificationOrderBy (
+        orders: Orderization<Notification>[] = []
+    ): Record<string, "asc" | "desc">[]
+    {
+        const sortable = [ "type", "read_at", "created_at", "updated_at", ];
+        const orderBy = (orders || []).flatMap ((order) => {
+            const field = String (order.field || "");
+            const direction: "asc" | "desc" = String (order.direction || "asc") === "desc" ? "desc" : "asc";
+
+            if (! sortable.includes (field)) {
+                return [];
+            }
+
+            return [ { [field]: direction, } as Record<string, "asc" | "desc">, ];
+        });
+
+        return orderBy.length ? orderBy : [ { updated_at: "desc", }, ];
+    }
+
+    /**
      * @param {string} userId
      * @param {Orderization<Notification>[]} orders
      * @param {Filterization<Notification>[]} filters
      * @param {OffsetPaginationType} page
-     * @returns {Promise<Notification[]>}
+     * @returns {Promise<OffsetPagination<Notification>>}
      */
     public async allOffset (
         userId: string,
@@ -51,16 +74,42 @@ export class NotificationUserRepository extends AppPostgreRepository
         page: OffsetPaginationType = { currentPage: 1, limitPage: 10, }
     ): Promise<OffsetPagination<Notification>>
     {
+        const filterMap: Record<string, string> = {};
+
+        for (const item of filters || []) {
+            const field = String (item.field || "").trim ();
+            const search = String (item.search || "").trim ();
+
+            if (field && search) {
+                filterMap[field] = search;
+            }
+        }
+
+        const where: DatabasePrismaPostgreConstraint.NotificationWhereInput = {
+            ... this.softDelete (),
+            user_id: userId,
+        };
+        const status = (filterMap.status || "").toLowerCase ();
+
+        if (status === "unread") {
+            where.read_at = null;
+        } else if (status === "read") {
+            where.read_at = { not: null, };
+        }
+
+        if (filterMap.type) {
+            where.type = filterMap.type;
+        }
+
+        const q = filterMap.q || filterMap.search;
+
+        if (q) {
+            where.type = { contains: q, mode: "insensitive", };
+        }
+
         return this.offsetPaginateAll<Notification> ("notification", {
-            where: {
-                ... this.softDelete (),
-                ... this.filter (filters),
-                user_id: userId,
-            },
-            orderBy: orders.length ? this.order (orders).orderBy : [
-                { updated_at: "desc", },
-                { read_at: "desc", },
-            ],
+            where,
+            orderBy: this.notificationOrderBy (orders),
             include: {
                 user: true,
             },
@@ -72,7 +121,7 @@ export class NotificationUserRepository extends AppPostgreRepository
      * @param {Orderization<Notification>[]} orders
      * @param {Filterization<Notification>[]} filters
      * @param {CursorPaginationType} page
-     * @returns {Promise<Notification[]>}
+     * @returns {Promise<CursorPagination<Notification>>}
      */
     public async allCursor (
         userId: string,
@@ -82,17 +131,42 @@ export class NotificationUserRepository extends AppPostgreRepository
     ): Promise<CursorPagination<Notification>>
     {
         page.cursorField = "id";
+        const filterMap: Record<string, string> = {};
+
+        for (const item of filters || []) {
+            const field = String (item.field || "").trim ();
+            const search = String (item.search || "").trim ();
+
+            if (field && search) {
+                filterMap[field] = search;
+            }
+        }
+
+        const where: DatabasePrismaPostgreConstraint.NotificationWhereInput = {
+            ... this.softDelete (),
+            user_id: userId,
+        };
+        const status = (filterMap.status || "").toLowerCase ();
+
+        if (status === "unread") {
+            where.read_at = null;
+        } else if (status === "read") {
+            where.read_at = { not: null, };
+        }
+
+        if (filterMap.type) {
+            where.type = filterMap.type;
+        }
+
+        const q = filterMap.q || filterMap.search;
+
+        if (q) {
+            where.type = { contains: q, mode: "insensitive", };
+        }
 
         return this.cursorPaginateAll<Notification> ("notification", {
-            where: {
-                ... this.softDelete (),
-                ... this.filter (filters),
-                user_id: userId,
-            },
-            orderBy: orders.length ? this.order (orders).orderBy : [
-                { updated_at: "desc", },
-                { read_at: "desc", },
-            ],
+            where,
+            orderBy: this.notificationOrderBy (orders),
             include: {
                 user: true,
             },
@@ -229,6 +303,26 @@ export class NotificationUserRepository extends AppPostgreRepository
 
     /**
      * @param {string} userId
+     * @returns {Promise<number>}
+     */
+    public async deleteAll (userId: string): Promise<number>
+    {
+        const result = await this.prismaPostgreService.notification.updateMany ({
+            where: {
+                user_id: userId,
+                deleted_at: null,
+            },
+            data: {
+                deleted_at: this.dateTimeHelper.now (),
+                updated_at: this.dateTimeHelper.now (),
+            },
+        });
+
+        return result.count;
+    }
+
+    /**
+     * @param {string} userId
      * @param {string} id
      * @returns {Promise<Notification | null>}
      */
@@ -292,7 +386,6 @@ export class NotificationUserRepository extends AppPostgreRepository
             return await transaction.notification.update ({
                 where: {
                     ... this.softDelete (),
-                    read_at: null,
                     user_id: userId,
                     id,
                 },

@@ -33,7 +33,7 @@ export class DateTimeHelper implements AppHelperContract
                              this.configService.get<string> ("app.fallbackLocale"),
             timezone: string = this.configService.get<string> ("app.timezone");
 
-        datetimeHelper.tz (timezone);
+        datetimeHelper.tz.setDefault (timezone);
         datetimeHelper.locale (locale);
 
         return datetimeHelper;

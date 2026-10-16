@@ -8,6 +8,8 @@ import { HasherHelper, } from "src/app/helpers/hasher.helper";
 import { DateTimeHelper, } from "src/app/helpers/datetime.helper";
 import request, { Response, } from "supertest";
 import { ulid, } from "ulid";
+import { UserAclRepository, } from "src/v1/api/user/repositories/user.acl.repository";
+import { UserRoleEnum, } from "src/v1/api/user/dtos/user.role.enum";
 
 /**
  * @function {setupTestApp}
@@ -59,6 +61,9 @@ export async function setupAuthTestApp (app: INestApplication): Promise<{ access
             updated_at: dateTimeHelper.now (),
         },
     });
+
+    const userAclRepository: UserAclRepository = app.get (UserAclRepository);
+    await userAclRepository.syncUserRole (user.id, UserRoleEnum.Superadmin);
 
     const response: Response = await request (app.getHttpServer ())
     .post ("/v1/auth/login")

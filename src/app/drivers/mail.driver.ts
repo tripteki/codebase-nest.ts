@@ -73,7 +73,16 @@ export class MailHbsDriver implements MailerOptionsFactory
 
                 dir: join (__dirname, "../", "views/"),
 
-                options: { strict: true, },
+                options: { strict: false, },
+            },
+
+            options: {
+
+                partials: {
+
+                    dir: join (__dirname, "../../", "v1/api/user/views/partials"),
+                    options: { strict: false, },
+                },
             },
 
             ... mailConfig,

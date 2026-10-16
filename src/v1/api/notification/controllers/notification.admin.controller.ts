@@ -1,5 +1,6 @@
-import { Request, Response, } from "express";
+import { Request, } from "express";
 import { Controller, HttpCode, Body, Param, Get, Post, Put, Patch, Delete, Req, Res, UseGuards, } from "@nestjs/common";
+import { Throttle as ThrottleMiddleware, ThrottlerGuard as ThrottleGuardMiddleware, } from "@nestjs/throttler";
 import { ApiTags, ApiParam, ApiBody, ApiResponse, ApiBearerAuth, } from "@nestjs/swagger";
 import { Status, Message, } from "src/app/dtos/app.dto";
 import { OffsetPaginationType, CursorPaginationType, OffsetPagination, CursorPagination, Orderization, Filterization, } from "src/app/repositories/app.repository";
@@ -17,6 +18,9 @@ import { UserHttpVerificationGuardMiddleware, } from "src/v1/api/user/middleware
 
 @ApiTags ("NotificationAdmin")
 @Controller ("/v1/admin/notifications")
+/**
+ * @class {NotificationAdminController}
+ */
 export class NotificationAdminController
 {
     /**
@@ -34,6 +38,8 @@ export class NotificationAdminController
 
     @Get ("/")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiOrderQueryStringDecorator ("orders")
@@ -52,12 +58,11 @@ export class NotificationAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {Orderization<NotificationTransformerDto>[]} orders
      * @param {Filterization<NotificationTransformerDto>[]} filters
      * @param {number} limitPage
      * @param {number} currentPage
-     * @returns {Promise<NotificationTransformerDto[]>}
+     * @returns {Promise<OffsetPagination<NotificationTransformerDto>>}
      */
     public async index (
         @Req () request: Request,
@@ -77,6 +82,8 @@ export class NotificationAdminController
 
     @Get ("/:id")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiShowCrudSpecDecorator ("id")
@@ -91,7 +98,6 @@ export class NotificationAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {NotificationIdentifierDto} parameters
      * @returns {Promise<NotificationTransformerDto | string>}
      */
@@ -108,6 +114,8 @@ export class NotificationAdminController
 
     @Delete ("/activate/:id")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiDestroyCrudSpecDecorator ("id")
@@ -122,7 +130,6 @@ export class NotificationAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {NotificationIdentifierDto} parameters
      * @returns {Promise<NotificationTransformerDto | string>}
      */
@@ -139,6 +146,8 @@ export class NotificationAdminController
 
     @Delete ("/deactivate/:id")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UseGuards (UserHttpAuthGuardMiddleware, UserHttpVerificationGuardMiddleware)
     @UserAuthAccessTokenMetadataMiddleware ()
     @AppApiDestroyCrudSpecDecorator ("id")
@@ -153,7 +162,6 @@ export class NotificationAdminController
     })
     /**
      * @param {Request} request
-     * @param {Response} response
      * @param {NotificationIdentifierDto} parameters
      * @returns {Promise<NotificationTransformerDto | string>}
      */

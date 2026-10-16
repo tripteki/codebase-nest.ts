@@ -1,17 +1,15 @@
 "use strict";
 
 import { INestApplication, Logger, } from "@nestjs/common";
-import { AppProviderContract, } from "src/app/contracts/app.provider.contract";
 
 /**
  * @class {AppConsoleProvider}
- * @implements {AppProviderContract}
  */
 export class AppConsoleProvider
 {
     /**
      * @param {(() => INestApplication | Promise<INestApplication>)} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async register (app: (() => INestApplication | Promise<INestApplication>)): Promise<void>
     {
@@ -20,7 +18,7 @@ export class AppConsoleProvider
 
     /**
      * @param {INestApplication} app
-     * @returns {void | Promise<void>}
+     * @returns {Promise<void>}
      */
     public static async boot (app: INestApplication): Promise<void>
     {

@@ -54,7 +54,7 @@ export abstract class AppMongoRepository implements AppRepository, AppPagination
     }
 
     /**
-     * @params {Orderization<T>[]} orders
+     * @param {Orderization<T>[]} orders
      * @returns {{ orderBy: Record<string, "asc" | "desc">[]; }}
      */
     protected order<T> (
@@ -107,6 +107,7 @@ export abstract class AppMongoRepository implements AppRepository, AppPagination
 
             return {
 
+                total: lengthQuery,
                 totalPage: lastPage,
                 perPage,
                 currentPage,
@@ -128,6 +129,7 @@ export abstract class AppMongoRepository implements AppRepository, AppPagination
 
             return {
 
+                total: 0,
                 totalPage: 1,
                 perPage,
                 currentPage,

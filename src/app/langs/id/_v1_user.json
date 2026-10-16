@@ -1,46 +1,48 @@
 {
     "common": {
-        "close_greeting": "Salam. {appName}.",
-        "start_greeting": "Halo {name}!",
+        "close_greeting": "Salam hormat,\n{appName}",
+        "start_greeting": "Hai {name},",
         "yes": "Ya",
         "no": "Tidak"
     },
-
+    "mail": {
+        "user_information": "Informasi pengguna",
+        "full_name": "Nama lengkap",
+        "email_address": "Alamat email",
+        "thanks": "Terima kasih",
+        "rights": "Hak cipta dilindungi."
+    },
     "account_activated": {
-        "subject": "Akun Anda Telah Diaktifkan",
-        "line": "Kami dengan senang hati memberitahukan Anda bahwa akun Anda telah berhasil diaktifkan.",
-        "thank_you": "Terima kasih telah menjadi bagian dari komunitas kami!"
+        "subject": "Akun Anda sudah aktif",
+        "line": "Akun Anda sudah aktif. Anda bisa masuk dan melanjutkan.",
+        "thank_you": "Terima kasih"
     },
-
     "account_deactivated": {
-        "subject": "Akun Anda Telah Dinonaktifkan",
-        "line": "Kami menyesal memberitahukan Anda bahwa akun Anda telah dinonaktifkan. Jika Anda merasa ini adalah kesalahan, harap hubungi dukungan.",
-        "thank_you": "Kami berharap dapat menyelesaikan masalah ini sesegera mungkin."
+        "subject": "Akun Anda dinonaktifkan",
+        "line": "Akun Anda telah dinonaktifkan. Masuk dijeda sampai admin mengaktifkannya kembali.",
+        "thank_you": "Terima kasih"
     },
-
     "account_registered": {
-        "subject": "Proses Verifikasi Akun Anda",
-        "line1": "Silahkan klik tombol link di bawah untuk verifikasi alamat email Anda.",
-        "line2": "Jika Anda tidak merasa membuat akun lewatkan saja proses ini.",
-        "verify": "Verifikasi Alamat E-Mail"
+        "subject": "Verifikasi email Anda",
+        "line1": "Terima kasih sudah bergabung. Tekan tombol di bawah untuk mengonfirmasi email dan menyelesaikan akun Anda.",
+        "line2": "Jika Anda tidak membuat akun ini, abaikan saja email ini.",
+        "verify": "Verifikasi email"
     },
-
     "account_reset": {
-        "subject": "Proses Reset Kata Sandi Akun Anda",
-        "line1": "Silakan klik tombol tautan di bawah ini untuk mereset kata sandi Anda.",
-        "line2": "Jika Anda tidak mereset kata sandi, mohon abaikan proses ini.",
-        "reset": "Reset Kata Sandi"
+        "subject": "Atur ulang kata sandi",
+        "line1": "Kami menerima permintaan untuk mengatur ulang kata sandi Anda. Tekan tombol di bawah untuk membuat yang baru. Tautan ini berlaku selama 60 menit.",
+        "line2": "Jika Anda tidak meminta ini, abaikan email ini. Kata sandi Anda tidak berubah.",
+        "reset": "Perbarui kata sandi"
     },
-
     "export": {
         "started": {
-            "message": "Ekspor telah dimulai. Anda akan menerima notifikasi ketika siap."
+            "message": "Export dimulai"
         },
         "completed": {
-            "message": "Ekspor pengguna Anda telah berhasil diselesaikan."
+            "message": "Export berhasil diselesaikan. File Anda siap diunduh."
         },
         "failed": {
-            "message": "Ekspor pengguna Anda gagal."
+            "message": "Export gagal. Silakan coba lagi nanti."
         },
         "sheet_name": "Pengguna",
         "column": {
@@ -54,13 +56,13 @@
     },
     "import": {
         "started": {
-            "message": "Impor telah dimulai. Anda akan menerima notifikasi ketika siap."
+            "message": "Import dimulai"
         },
         "completed": {
-            "message": "Impor pengguna Anda telah berhasil diselesaikan. {totalImported} diimpor, {totalSkipped} dilewati."
+            "message": "Import berhasil diselesaikan. {totalImported} pengguna diimpor, {totalSkipped} pengguna dilewati."
         },
         "failed": {
-            "message": "Impor pengguna Anda gagal."
+            "message": "Import gagal. Silakan periksa format file dan coba lagi."
         },
         "column": {
             "id": "ID",
@@ -71,5 +73,67 @@
             "created_at": "Dibuat Pada",
             "updated_at": "Diperbarui Pada"
         }
+    },
+    "roles": {
+        "superadmin": "Superadmin",
+        "admin": "Admin",
+        "user": "Pengguna"
+    },
+    "account_created": {
+        "title": "Akun dibuat",
+        "body": "Admin membuat akun Anda dengan role {role}.",
+        "subject": "Akun Anda sudah siap",
+        "line1": "Admin membuat akun untuk Anda dengan role {role}. Masuk menggunakan alamat email ini.",
+        "line2": "Email ini tidak berisi kata sandi. Gunakan Lupa kata sandi untuk mengatur sendiri.",
+        "login": "Masuk",
+        "forgot": "Lupa kata sandi"
+    },
+    "account_email_change": {
+        "subject": "Konfirmasi email baru Anda",
+        "line1": "Anda meminta memakai alamat ini untuk akun Anda. Tekan tombol di bawah untuk mengonfirmasinya. Tautan ini berlaku selama 60 menit.",
+        "line2": "Sebelum dikonfirmasi, Anda tetap bisa masuk dengan email lama. Jika Anda tidak meminta ini, abaikan email ini.",
+        "verify": "Konfirmasi email"
+    },
+    "role_changed": {
+        "title": "Role diubah",
+        "body": "Role Anda sekarang {role}."
+    },
+    "registration": {
+        "verified_title": "Pendaftaran selesai",
+        "verified_body": "Email Anda sudah diverifikasi dan akun siap digunakan.",
+        "new_title": "Ada pengguna baru",
+        "new_body": "Pengguna baru mendaftar: {full_name} <{email}> · Role: {role}"
+    },
+    "security": {
+        "password_subject": "Kata sandi Anda telah diubah",
+        "password_line_self": "Anda mengubah kata sandi pada {time}.",
+        "password_line_admin": "Admin {admin} mengubah kata sandi Anda pada {time}.",
+        "password_warning": "Jika Anda tidak memintanya, gunakan Lupa kata sandi dan hubungi admin.",
+        "login": "Masuk",
+        "email_old_subject": "Email akun Anda telah diubah",
+        "email_old_line": "Email akun Anda diubah menjadi {email}.",
+        "email_old_warning": "Jika Anda tidak memintanya, hubungi admin.",
+        "email_new_subject": "Email ini sekarang dipakai untuk masuk",
+        "email_new_line": "Email ini sekarang dipakai untuk masuk ke akun Anda."
+    },
+    "auth": {
+        "missing_token": "Tidak Diizinkan",
+        "invalid_token": "Tidak Diizinkan",
+        "forbidden": "Anda tidak memiliki izin untuk tindakan ini",
+        "role_forbidden": "Anda tidak dapat memberi role ini",
+        "role_self_forbidden": "Anda tidak dapat mengubah role Anda sendiri",
+        "account_locked": "Hanya superadmin yang dapat mengubah akun ini",
+        "email_already_exists": "Email sudah terdaftar",
+        "invalid_credentials": "Kredensial tidak valid",
+        "reset_link_sent": "Jika email terdaftar, tautan reset telah dikirim",
+        "verification_email_sent": "Email verifikasi telah dikirim",
+        "name_already_exists": "Nama sudah terdaftar",
+        "password_mismatch": "Password dan konfirmasi password harus sama",
+        "password_confirmation_required": "Konfirmasi password diperlukan ketika password diberikan",
+        "password_required": "Password diperlukan ketika konfirmasi password diberikan",
+        "email_not_verified": "Verifikasi email Anda sebelum masuk",
+        "invalid_or_expired_verify_link": "Tautan verifikasi ini sudah kedaluwarsa atau sudah dipakai. Minta tautan baru.",
+        "user_not_found": "Pengguna tidak ditemukan",
+        "invalid_or_expired_reset_token": "Token reset tidak valid atau telah kedaluwarsa"
     }
 }

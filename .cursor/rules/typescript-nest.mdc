@@ -65,22 +65,24 @@ handleImported(event: UserAdminImportedEvent) {
 
 ```typescript
 // Input validation
-export class UserLoginValidatorDto {
-  @IsEmail()
-  email: string;
+export class UserLoginValidatorDto
+{
+    @IsEmail ()
+    email: string;
 
-  @IsString()
-  @MinLength(8)
-  password: string;
+    @IsString ()
+    @MinLength (8)
+    password: string;
 }
 
 // Output transformation
-export class UserTransformerDto {
-  @ApiProperty()
-  id: number;
+export class UserTransformerDto
+{
+    @ApiProperty ()
+    id: string;
 
-  @ApiProperty()
-  email: string;
+    @ApiProperty ()
+    email: string;
 }
 ```
 
@@ -96,10 +98,9 @@ export class UserTransformerDto {
 
 ## GraphQL (parallel stack)
 
-- Resolvers in `src/v1/graphql/{domain}/resolvers/`
-- Share service layer with REST — do not duplicate business logic
-- Separate DTOs for GraphQL input/output types
-- Middleware for auth context in `middlewares/`
+- Resolvers in `src/v1/graphql/{domain}/resolvers/` stay in the tree
+- Do not boot `AppGraphqlProvider`. The call in `main.ts` stays commented out
+- If it is mounted later, call the REST service and keep GraphQL DTOs separate
 
 ## Bull queue processors
 
@@ -113,7 +114,7 @@ export class UserTransformerDto {
 |---------|-----|
 | E2E fails with ECONNREFUSED 6379 | Start Redis before running tests |
 | Business logic in controller | Move to service layer |
-| Different error shape than siblings | Return `{ detail: [...] }` for 422 |
+| Different validation shape than FastAPI | Return HTTP 422 `{ detail: [...] }` via `I18nValidationExceptionFilter` |
 | Throttle in development | Guard with `NODE_ENV === 'production'` |
 | `@/` imports | Use `src/...` absolute paths |
-| Duplicate logic in GraphQL resolver | Call shared service method |
+| Booting GraphQL | Leave `AppGraphqlProvider.boot` commented out |

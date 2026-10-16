@@ -5,7 +5,22 @@ alwaysApply: true
 
 # NestJS — Project Conventions
 
-This is the **NestJS 10** backend in the Tripteki parallel-codebase family. It shares the same domain model, API contract, and event names with FastAPI and Laravel siblings.
+This is the **NestJS 10** backend in the Tripteki parallel-codebase family. It shares one REST contract and the same event names with FastAPI. Nuxt and Next can use either backend. The product brand is **Codebase**.
+
+## Family conventions
+
+| Topic | Rule |
+|-------|------|
+| Roles | Exactly `superadmin`, `admin`, `user` through `UserRoleEnum` |
+| Brand | `APP_NAME` Codebase. Primary `#2563eb`, secondary `#84cc16`, tertiary `#1e3a8a` |
+| Locales | `en`, `id`, `ms` under `src/app/langs/` |
+| GraphQL | Sources stay in the tree. `AppGraphqlProvider` is not booted |
+| Mongo | Off when `DATABASE_MONGO_URI` is empty |
+| Rate limit | Production only (`app.env !== production` skips the throttler) |
+| Format | Indent 4, double quotes, trailing commas, space before `(` |
+| Docs | Keep JSDoc |
+| Principles | SOLID, dependency injection, tight cohesion and loose coupling |
+| Patterns | Repository, validator/transformer DTO, middleware, observer (events and listeners) |
 
 ## Stack
 
@@ -13,14 +28,14 @@ This is the **NestJS 10** backend in the Tripteki parallel-codebase family. It s
 |-------|--------|
 | Framework | NestJS 10 + TypeScript (strict, SWC builder) |
 | Runtime | **Bun** (`bun run`); README may still reference npm |
-| ORM | Prisma — PostgreSQL (migrations) + MongoDB (`db push`) |
+| ORM | Prisma — PostgreSQL migrations. MongoDB only when `DATABASE_MONGO_URI` is set |
 | Cache/Queue | Redis — cache, Bull job queues |
 | REST | Swagger at `/api/docs` |
-| GraphQL | Apollo at `/graphql` |
-| WebSockets | Socket.IO — room-based emits to `user.{id}` |
+| GraphQL | Apollo sources exist. `/graphql` is not mounted |
+| WebSockets | Socket.IO — room-based emits to `user:{id}` |
 | Auth | JWT — access + refresh tokens |
 | Mail | Handlebars templates via Nest mailer |
-| i18n | nest-i18n |
+| i18n | nestjs-i18n — `en`, `id`, `ms` |
 | Scheduler | `@nestjs/schedule` |
 
 ## Directory layout
@@ -76,38 +91,34 @@ No `@` path alias in tsconfig — always use `src/...` imports.
 ## Shared API contract (all backends)
 
 ### Endpoints
-- REST base: `/api/v1`
+- REST base: `/api/v1` (global prefix `api` plus controller paths that already include `v1`)
 - Swagger docs: `/api/docs`
-- GraphQL: `/graphql`
+- GraphQL is not mounted
 - Health/status: `/api/status`
 
 ### Auth
-- `POST /api/v1/auth/login` — returns `{ access_token, refresh_token, token_type, expires_in }`
-- `POST /api/v1/auth/refresh` — accepts `{ refresh_token }` or cookie
-- `POST /api/v1/auth/register`, `POST /api/v1/auth/logout`
-- `GET /api/v1/auth/profile` — returns user profile
-- Login supports `remember` flag for extended refresh token
+- `POST /api/v1/auth/login` returns HTTP 201 `{ accessToken, refreshToken, accessTokenTtl, refreshTokenTtl }`
+- Login body is `{ identifierKey, identifierValue, password, remember }`; `identifierKey` is `email` or `name` (optional, inferred from `@`)
+- `POST /api/v1/auth/refresh`, `POST /api/v1/auth/register`, `POST /api/v1/auth/logout`
+- Profile is `GET` and `PUT /api/v1/users/me`
+- Signed pages on the frontend are `/auth/reset-password/{email}` and `/auth/verify-email/{email}`
 
 ### Error responses
 ```json
-// Validation (HTTP 422)
-{ "detail": [{ "loc": ["body", "email"], "msg": "...", "type": "..." }] }
+// Validation (HTTP 422), same detail shape as FastAPI
+{ "detail": [{ "type": "string_too_short", "loc": ["body", "password"], "msg": "String should have at least 8 characters", "input": "123", "ctx": { "min_length": 8 } }] }
 
-// General (HTTP 4xx/5xx)
-{ "message": "Human-readable error" }
+// Other HTTP exceptions (AppHttpExceptionFilter), same as FastAPI and Laravel
+{ "detail": "Invalid credentials" }
 ```
 
 ### Pagination
 ```json
-{
-  "data": [...],
-  "meta": { "total": 100, "per_page": 15, "current_page": 1, "last_page": 7 },
-  "links": { "first": "...", "last": "...", "prev": null, "next": "..." }
-}
+{ "total": 0, "totalPage": 1, "perPage": 10, "currentPage": 1, "nextPage": null, "previousPage": null, "firstPage": 1, "lastPage": 1, "data": [] }
 ```
 
 ### Rate limiting
-- Throttle/rate-limit applies in **production only** (`NODE_ENV=production`)
+- Throttle applies in **production only** (`app.env === production`)
 - Do not throttle in development or tests
 
 ## Environment variables
@@ -130,7 +141,7 @@ Config loaded via `@nestjs/config` `registerAs()` in `src/app/configs/`.
 bun install
 bun run prisma              # Generate Prisma clients
 bun run postgre:migrate     # PostgreSQL migrations
-bun run mongo:migrate       # MongoDB schema push
+bun run mongo:migrate       # MongoDB schema push, only when DATABASE_MONGO_URI is set
 bun run dev                 # Start dev server
 bun run build               # Production build
 ```
@@ -144,7 +155,7 @@ bun run test:e2e            # Jest e2e with coverage
 
 - **E2E only** — no unit test suite; do not add unit tests unless requested
 - **Requires Redis** running at `127.0.0.1:6379` for e2e tests
-- Default test user: `user@mail.com` / `12345678`
+- Default test user: `superuser@mail.com` / `12345678`
 - Helpers: `setupTestApp()`, `setupAuthTestApp()` in `test/test.case.ts`
 
 ## Lint

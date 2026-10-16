@@ -1,3 +1,4 @@
+import { Transform, } from "class-transformer";
 import { JsonValue, } from "@prisma/client/runtime/library";
 import { UserTransformerDto, } from "src/v1/api/user/dtos/user.transformer.dto";
 
@@ -73,6 +74,7 @@ export class NotificationTransformerDto
     constructor (partial: Partial<NotificationTransformerDto>)
     {
         Object.assign (this, partial);
+        this.user = null;
     }
 
     /**
@@ -115,6 +117,7 @@ export class NotificationTransformerDto
      */
     deleted_at?: Date | null;
 
+    @Transform (() => null, { toClassOnly: true, })
     /**
      * @type {UserTransformerDto | null}
      */

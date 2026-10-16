@@ -1,4 +1,5 @@
 import { Request, } from "express";
+import { renameSync, } from "fs";
 import {
     Controller,
     HttpCode,
@@ -10,9 +11,7 @@ import {
     UseGuards,
     UseInterceptors,
     UploadedFile,
-    ParseFilePipe,
-    MaxFileSizeValidator,
-    FileTypeValidator,
+    UnprocessableEntityException,
 } from "@nestjs/common";
 import { FileInterceptor, } from "@nestjs/platform-express";
 import {
@@ -25,9 +24,10 @@ import {
 } from "@nestjs/swagger";
 import { diskStorage, } from "multer";
 import { extname, join, } from "path";
+import { Throttle as ThrottleMiddleware, ThrottlerGuard as ThrottleGuardMiddleware, } from "@nestjs/throttler";
 import { Status, Message, } from "src/app/dtos/app.dto";
 import { AppApiStandardResponsesDecorator, } from "src/app/decorators/app.swagger.decorator";
-import { AVATAR_MAX_SIZE_BYTES, AVATAR_MIME_TYPE_PATTERN, } from "src/v1/api/user/dtos/user.avatar.enum";
+import { assertAvatarUpload, discardUpload, } from "src/app/http/app.upload.guard";
 import { UserHttpAuthGuardMiddleware, } from "src/v1/api/user/middlewares/user.auth.guard.middleware";
 import { UserAuthAccessTokenMetadataMiddleware, } from "src/v1/api/user/dtos/user.auth.enum";
 import { UserProfileService, } from "src/v1/api/user/services/user.profile.service";
@@ -37,8 +37,14 @@ import {
 } from "src/v1/api/user/dtos/user.transformer.dto";
 import { UserMeUpdateValidatorDto, } from "src/v1/api/user/dtos/user.validator.dto";
 
+/**
+ * @type {string}
+ */
 const AVATAR_DESTINATION = join (__dirname, "../../../../../storage/disks/public/avatars/");
 
+/**
+ * @type {Record<string, unknown>}
+ */
 const PROFILE_MULTIPART_BODY = {
     required: true,
     schema: {
@@ -85,6 +91,9 @@ function parseInterests (body: Record<string, unknown>): string[]
 
 @ApiTags ("Users")
 @Controller ()
+/**
+ * @class {UserProfileController}
+ */
 export class UserProfileController
 {
     /**
@@ -100,7 +109,9 @@ export class UserProfileController
 
     @Get ("/v1/users/me")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
     @ApiOperation ({ summary: "Show Current User Profile", })
@@ -119,7 +130,9 @@ export class UserProfileController
 
     @Put ("/v1/users/me")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
     @ApiOperation ({ summary: "Update Current User Profile", })
@@ -141,7 +154,9 @@ export class UserProfileController
 
     @Post ("/v1/users/me")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @UseInterceptors (FileInterceptor ("avatar", {
         storage: diskStorage ({
@@ -168,17 +183,19 @@ export class UserProfileController
      */
     public async updateMeMultipart (
         @Req () request: Request,
-        @UploadedFile (new ParseFilePipe ({
-            fileIsRequired: false,
-            validators: [
-                new MaxFileSizeValidator ({ maxSize: AVATAR_MAX_SIZE_BYTES, }),
-                new FileTypeValidator ({ fileType: AVATAR_MIME_TYPE_PATTERN, }),
-            ],
-        }))
-        avatar?: Express.Multer.File
+        @UploadedFile () avatar?: Express.Multer.File
     ): Promise<UserMeTransformerDto | string>
     {
         const body = request.body as Record<string, unknown>;
+        const missing = [ "name", "email", ].filter ((field) => body[field] === undefined);
+
+        if (missing.length) {
+            discardUpload (avatar);
+            throw new UnprocessableEntityException ({
+                detail: missing.map ((field) => ({ type: "missing", loc: [ "body", field, ], msg: "Field required", input: null, ctx: {}, })),
+            });
+        }
+
         const inputs: UserMeUpdateValidatorDto = {
             name: String (body.name ?? ""),
             email: String (body.email ?? ""),
@@ -190,7 +207,14 @@ export class UserProfileController
                 : null,
         };
 
-        const avatarPath = avatar ? `avatars/${avatar.filename}` : undefined;
+        let avatarPath: string | undefined;
+
+        if (avatar) {
+            const extension = assertAvatarUpload (avatar);
+            const filename = `${Date.now ()}${extension}`;
+            renameSync (avatar.path, join (AVATAR_DESTINATION, filename));
+            avatarPath = `avatars/${filename}`;
+        }
 
         return await this.userProfileService.updateMe (
             request["user"].sub,
@@ -201,7 +225,9 @@ export class UserProfileController
 
     @Get ("/v1/users/me/interests")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 10, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
     @ApiOperation ({ summary: "Profile Interest Suggestions", })
@@ -229,7 +255,9 @@ export class UserProfileController
 
     @Get ("/v1/users/me/accesses")
     @HttpCode (Status.OK)
+    @UseGuards (ThrottleGuardMiddleware)
     @UseGuards (UserHttpAuthGuardMiddleware)
+    @ThrottleMiddleware ({ default: { limit: 180, ttl: 60000, }, })
     @UserAuthAccessTokenMetadataMiddleware ()
     @ApiBearerAuth ()
     @ApiOperation ({ summary: "Current User Accesses", })

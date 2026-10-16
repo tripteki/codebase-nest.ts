@@ -3,12 +3,12 @@
 import { HttpStatus, } from "@nestjs/common";
 
 /**
- * @typedef {number} Status
+ * @type {typeof HttpStatus}
  */
 export const Status = HttpStatus;
 
 /**
- * @typedef {string} Message
+ * @enum {string}
  */
 export enum Message
 {
