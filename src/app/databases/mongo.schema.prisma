@@ -2,6 +2,7 @@ generator mongo {
 
     provider = "prisma-client-js"
     output   = "../../../node_modules/@prisma/mongo/client"
+    binaryTargets = [ "native", "linux-musl-openssl-3.0.x" ]
 }
 
 datasource mongo {

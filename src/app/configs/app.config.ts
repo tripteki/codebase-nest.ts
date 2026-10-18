@@ -222,9 +222,9 @@ export default registerAs ("app", () => ({
      * -----------------------------------------------------
      *
      * Configures the application's timezone. Defaults to UTC, but
-     * can be set via `process.env.TZ` (e.g., "America/New_York").
+     * can be set via `APP_TIMEZONE`, `TIMEZONE`, or `TZ`.
      */
-    timezone: String (process.env.TZ || "UTC"),
+    timezone: String (process.env.APP_TIMEZONE || process.env.TIMEZONE || process.env.TZ || "UTC"),
 
     /**
      * -----------------------------------------------------
@@ -232,9 +232,9 @@ export default registerAs ("app", () => ({
      * -----------------------------------------------------
      *
      * Specifies the format in which dates/times are displayed in the application.
-     * This can be adjusted as needed.
+     * Set with `APP_DATETIME_FORMAT` or `DATETIME_FORMAT`.
      */
-    datetimeFormat: "YYYY-MM-DD HH:mm:ss",
+    datetimeFormat: String (process.env.APP_DATETIME_FORMAT || process.env.DATETIME_FORMAT || "YYYY-MM-DD HH:mm:ss"),
 
     /**
      * -----------------------------------------------------
@@ -247,8 +247,8 @@ export default registerAs ("app", () => ({
      * - `fakerLocale`: Locale for generating fake data (default is "en").
      * - `fallbackLocale`: Fallback locale in case the preferred locale is unavailable.
      */
-    locale: String (process.env.APP_LOCALE || "en"),
-    fakerLocale: String (process.env.APP_FAKER_LOCALE || "en"),
-    fallbackLocale: String (process.env.APP_FALLBACK_LOCALE || "en"),
+    locale: String (process.env.APP_LOCALE || process.env.LOCALE || "en"),
+    fakerLocale: String (process.env.APP_FAKER_LOCALE || process.env.FAKER_LOCALE || "en"),
+    fallbackLocale: String (process.env.APP_FALLBACK_LOCALE || process.env.FALLBACK_LOCALE || "en"),
 
 }));

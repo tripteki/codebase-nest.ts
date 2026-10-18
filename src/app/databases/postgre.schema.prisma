@@ -2,6 +2,7 @@ generator postgre {
 
     provider = "prisma-client-js"
     // output   = "../../../node_modules/@prisma/postgre/client" //
+    binaryTargets = [ "native", "linux-musl-openssl-3.0.x" ]
 }
 
 datasource postgre {

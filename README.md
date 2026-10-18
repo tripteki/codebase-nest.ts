@@ -81,6 +81,32 @@ Put the generated secret in `APP_SECRET`. The seeder creates `superuser@{APP_EMA
 
 Queues for import, export, and Web Push run inside the application. Swagger UI: `http://localhost:8000/api/docs`
 
+## Docker
+
+The image is `oven/bun:1-alpine` and runs `dist` with Bun. The runtime stage keeps production dependencies, the generated Prisma clients, the Prisma schemas, and `dist`.
+
+```bash
+cp .env.example .env
+docker compose build
+docker compose run --rm nest bun dist/cli.js secret
+docker compose up -d
+```
+
+Put the generated secret in `APP_SECRET` before `docker compose up`. Migrations and seeders run manually:
+
+```bash
+docker compose exec nest bunx prisma migrate deploy --schema=./src/app/databases/postgre.schema.prisma
+docker compose exec nest bun dist/cli.js v1:user:seed
+```
+
+| Service | Purpose | Port |
+|---------|---------|------|
+| `nest` | Nest server | `APP_PORT` (8000) |
+| `postgres`, `redis` | PostgreSQL 16 and Redis 7 | internal |
+| `mongo` | MongoDB 7 (profile `mongo`) | internal |
+
+Compose points PostgreSQL and Redis at its own containers. Change their credentials with `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, and `REDIS_PASSWORD`. Enable MongoDB with `docker compose --profile mongo up -d` and `DATABASE_MONGO_URI=mongodb://mongo:27017/codebase`.
+
 ## API
 
 All routes live under `/api/v1`.

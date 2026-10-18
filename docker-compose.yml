@@ -1,0 +1,75 @@
+name: codebase-nest
+
+x-nest-env: &nest-env
+  DATABASE_POSTGRE_URI: postgresql://${POSTGRES_USER:-codebase}:${POSTGRES_PASSWORD:-codebase}@postgres:5432/${POSTGRES_DB:-codebase}
+  MEMORY_REDIS_HOST: redis
+  MEMORY_REDIS_PORT: 6379
+  MEMORY_REDIS_USERNAME: default
+  MEMORY_REDIS_PASSWORD: ${REDIS_PASSWORD:-codebase}
+
+services:
+  nest:
+    image: codebase-nest:latest
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *nest-env
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - nest-storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    init: true
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-codebase}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-codebase}
+      POSTGRES_DB: ${POSTGRES_DB:-codebase}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-codebase}", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-codebase}
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    profiles: ["mongo"]
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+volumes:
+  nest-storage:
+  postgres-data:
+  redis-data:
+  mongo-data:
